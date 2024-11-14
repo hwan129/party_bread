@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1006487071210",
+    "project_id": "party-bread",
+    "storage_bucket": "party-bread.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006487071210:android:e6dec7067ff962268aaa93",
+        "android_client_info": {
+          "package_name": "com.example.party_bread"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006487071210-gub9qgjmslni662vqee2ar4839ehp7bk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.party_bread",
+            "certificate_hash": "a7008c63d9112e54d1a4158d39b0ce5d2d8366f6"
+          }
+        },
+        {
+          "client_id": "1006487071210-r063ab2u0qsksad0o2vuigqdriujcqau.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBx5kGNlEheIqOk-hm0S0BRvy-ayvpgGVk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006487071210-r063ab2u0qsksad0o2vuigqdriujcqau.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
