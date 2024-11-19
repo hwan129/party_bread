@@ -36,7 +36,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ? ElevatedButton(
                   onPressed: () {
                     // 온보딩 완료 후 메인 페이지로 이동 설정
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.pushReplacementNamed(context, '/home');
                   },
                   child: Text('Get Started'),
                 )
