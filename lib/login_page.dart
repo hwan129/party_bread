@@ -31,9 +31,6 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print("Error Google sign-in: $e");
     }
-
-    Navigator.pushReplacementNamed(
-        context, '/onboarding'); // to onboarding page
   }
 
   Future<void> _handleUserSignIn(User? user,
@@ -59,7 +56,8 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
 
-    Navigator.pop(context);
+    Navigator.pushReplacementNamed(
+        context, '/onboarding'); // to onboarding page
   }
 
   @override
