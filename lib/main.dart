@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'splash_page.dart';
 import 'login_page.dart';
 import 'signup_email_page.dart';
 import 'signup_phone_page.dart';
@@ -26,9 +25,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/', // 시작 페이지 설정
+      initialRoute: '/Login', // 시작 페이지 설정
       routes: {
-        '/': (context) => SplashPage(), // 스플래시 페이지
         '/Login': (context) => LoginPage(), // 로그인 페이지
         '/signupEmail': (context) => SignupEmailPage(), // 회원가입 - 이메일 입력 페이지
         '/signupPhone': (context) => SignupPhonePage(), // 회원가입 - 전화번호 입력 페이지
