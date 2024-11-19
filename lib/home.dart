@@ -17,6 +17,43 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ]),
+      body: Column(
+        children: [
+          Column(
+            children: [
+              Text("어떤 팟빵에 드갈래"),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/result');
+                    },
+                    child: const Text('배달팟빵'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/result');
+                    },
+                    child: const Text('택시팟빵'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/result');
+                    },
+                    child: const Text('공구팟빵'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/result');
+                    },
+                    child: const Text('기타팟빵'),
+                  ),
+                ],
+              )
+            ],
+          )
+        ],
+      ),
     );
   }
 }

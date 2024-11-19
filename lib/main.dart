@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'home.dart';
 import 'profile.dart';
+import 'result.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
         '/login': (context) => LoginPage(), // 로그인 페이지
+        '/result': (context) => ResultPage(), // 카테고리, 검색 결과 페이지
         '/profile': (context) => ProfilePage(), // 프로필 페이지
         '/signupEmail': (context) => SignupEmailPage(), // 회원가입 - 이메일 입력 페이지
         '/signupPhone': (context) => SignupPhonePage(), // 회원가입 - 전화번호 입력 페이지
