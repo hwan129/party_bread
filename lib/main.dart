@@ -10,11 +10,12 @@ import 'onboarding_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  );runApp(MyApp());
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -32,8 +33,10 @@ class MyApp extends StatelessWidget {
         '/signupEmail': (context) => SignupEmailPage(), // 회원가입 - 이메일 입력 페이지
         '/signupPhone': (context) => SignupPhonePage(), // 회원가입 - 전화번호 입력 페이지
         '/signupName': (context) => SignupNamePage(), // 회원가입 - 이름 입력 페이지
-        '/signupNickname': (context) => SignupNicknamePage(), // 회원가입 - 닉네임 입력 페이지
-        '/locationPermission': (context) => LocationPermissionPage(), // 위치 정보 확인 페이지
+        '/signupNickname': (context) =>
+            SignupNicknamePage(), // 회원가입 - 닉네임 입력 페이지
+        '/locationPermission': (context) =>
+            LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
       },
     );

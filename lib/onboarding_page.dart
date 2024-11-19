@@ -51,7 +51,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          Text(title,
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
           SizedBox(height: 16),
           Text(description, style: TextStyle(fontSize: 18)),
         ],

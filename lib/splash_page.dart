@@ -7,7 +7,7 @@ class SplashPage extends StatelessWidget {
       Navigator.pushReplacementNamed(context, '/Login');
     });
     return Scaffold(
-      body: Center(child: Text('Splash Page', style: TextStyle(fontSize: 24))),
+      body: Center(child: Image.asset('assets/image/splash.png')),
     );
   }
 }
