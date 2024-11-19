@@ -27,8 +27,30 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.brown, // 주요
+          scaffoldBackgroundColor: Colors.white, // 배경
+          appBarTheme: AppBarTheme(
+            // appbar style
+            backgroundColor: Color(0xFF574142),
+            foregroundColor: Colors.white,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            // textbutton
+            style: TextButton.styleFrom(
+              backgroundColor: Color(0xFFE5D6D6),
+              foregroundColor: Colors.black,
+            ),
+          ),
+          textTheme: TextTheme(
+            // 기본 text
+            bodyLarge: TextStyle(color: Color(0xFF574142)),
+            bodyMedium: TextStyle(color: Color(0xFF574142)),
+            bodySmall: TextStyle(color: Color(0xFF574142)),
+          ),
+          colorScheme: ColorScheme.fromSwatch(
+            primarySwatch: Colors.brown,
+          )),
+
       initialRoute: '/login', // 시작 페이지 설정
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
