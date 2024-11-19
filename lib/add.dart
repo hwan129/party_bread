@@ -19,7 +19,7 @@ class _AddPageState extends State<AddPage> {
               Text("만들자!"),
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/result');
+                  // Navigator.pushNamed(context, '/result');
                 },
                 child: const Text('팟빵 굽기'),
               ),
