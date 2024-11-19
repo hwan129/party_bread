@@ -31,16 +31,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ),
           ),
           _buildPageIndicator(),
-          SizedBox(height: 20), // ÆäÀÌÁö ÀÎµðÄÉÀÌÅÍ¿Í ¹öÆ° °£ °£°Ý
+          SizedBox(height: 20), // íŽ˜ì´ì§€ ì¸ë””ì¼€ì´í„°ì™€ ë²„íŠ¼ ê°„ ê°„ê²©
           _currentPage == 2
               ? ElevatedButton(
                   onPressed: () {
-                    // ¿Âº¸µù ¿Ï·á ÈÄ ¸ÞÀÎ ÆäÀÌÁö·Î ÀÌµ¿ ¼³Á¤
+                    // ì˜¨ë³´ë”© ì™„ë£Œ í›„ ë©”ì¸ íŽ˜ì´ì§€ë¡œ ì´ë™ ì„¤ì •
                     Navigator.popUntil(context, (route) => route.isFirst);
                   },
                   child: Text('Get Started'),
                 )
-              : SizedBox(height: 50), // ÇÏ´Ü ¿©¹é
+              : SizedBox(height: 50), // í•˜ë‹¨ ì—¬ë°±
         ],
       ),
     );

@@ -25,17 +25,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/login', // ½ÃÀÛ ÆäÀÌÁö ¼³Á¤
+      initialRoute: '/login', // ì‹œì‘ í˜ì´ì§€ ì„¤ì •
       routes: {
-        '/login': (context) => LoginPage(), // ·Î±×ÀÎ ÆäÀÌÁö
-        '/signupEmail': (context) => SignupEmailPage(), // È¸¿ø°¡ÀÔ - ÀÌ¸ŞÀÏ ÀÔ·Â ÆäÀÌÁö
-        '/signupPhone': (context) => SignupPhonePage(), // È¸¿ø°¡ÀÔ - ÀüÈ­¹øÈ£ ÀÔ·Â ÆäÀÌÁö
-        '/signupName': (context) => SignupNamePage(), // È¸¿ø°¡ÀÔ - ÀÌ¸§ ÀÔ·Â ÆäÀÌÁö
+        '/login': (context) => LoginPage(), // ë¡œê·¸ì¸ í˜ì´ì§€
+        '/signupEmail': (context) => SignupEmailPage(), // íšŒì›ê°€ì… - ì´ë©”ì¼ ì…ë ¥ í˜ì´ì§€
+        '/signupPhone': (context) => SignupPhonePage(), // íšŒì›ê°€ì… - ì „í™”ë²ˆí˜¸ ì…ë ¥ í˜ì´ì§€
+        '/signupName': (context) => SignupNamePage(), // íšŒì›ê°€ì… - ì´ë¦„ ì…ë ¥ í˜ì´ì§€
         '/signupNickname': (context) =>
-            SignupNicknamePage(), // È¸¿ø°¡ÀÔ - ´Ğ³×ÀÓ ÀÔ·Â ÆäÀÌÁö
+            SignupNicknamePage(), // íšŒì›ê°€ì… - ë‹‰ë„¤ì„ ì…ë ¥ í˜ì´ì§€
         '/locationPermission': (context) =>
-            LocationPermissionPage(), // À§Ä¡ Á¤º¸ È®ÀÎ ÆäÀÌÁö
-        '/onboarding': (context) => OnboardingPage(), // ¿Âº¸µù ÆäÀÌÁö
+            LocationPermissionPage(), // ìœ„ì¹˜ ì •ë³´ í™•ì¸ í˜ì´ì§€
+        '/onboarding': (context) => OnboardingPage(), // ì˜¨ë³´ë”© í˜ì´ì§€
       },
     );
   }
