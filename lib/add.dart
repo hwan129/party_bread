@@ -19,27 +19,19 @@ class _AddPageState extends State<AddPage> {
               Row(
                 children: [
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/result');
-                    },
+                    onPressed: () {},
                     child: const Text('배달팟빵'),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/result');
-                    },
+                    onPressed: () {},
                     child: const Text('택시팟빵'),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/result');
-                    },
+                    onPressed: () {},
                     child: const Text('공구팟빵'),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/result');
-                    },
+                    onPressed: () {},
                     child: const Text('기타팟빵'),
                   ),
                 ],
