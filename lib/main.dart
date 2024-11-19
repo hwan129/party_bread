@@ -8,6 +8,7 @@ import 'location_permission_page.dart';
 import 'onboarding_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/login', // 시작 페이지 설정
       routes: {
+        '/home': (context) => HomePage(), // 메인 페이지
         '/login': (context) => LoginPage(), // 로그인 페이지
         '/signupEmail': (context) => SignupEmailPage(), // 회원가입 - 이메일 입력 페이지
         '/signupPhone': (context) => SignupPhonePage(), // 회원가입 - 전화번호 입력 페이지

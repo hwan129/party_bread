@@ -84,6 +84,7 @@ lib/generated_plugin_registrant.dart
 **/android/**/GeneratedPluginRegistrant.java
 **/android/gradle.properties
 android\gradle.properties
+gradle.properties
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
