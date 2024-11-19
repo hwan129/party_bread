@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1006487071210",
+    "firebase_url": "https://party-bread-default-rtdb.firebaseio.com",
     "project_id": "party-bread",
     "storage_bucket": "party-bread.firebasestorage.app"
   },
