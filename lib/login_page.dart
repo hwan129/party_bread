@@ -20,20 +20,23 @@ class _LoginPageState extends State<LoginPage> {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       await _handleUserSignIn(userCredential.user, isGoogleSignIn: true);
     } catch (e) {
       print("Error Google sign-in: $e");
     }
   }
 
-  Future<void> _handleUserSignIn(User? user, {required bool isGoogleSignIn}) async {
+  Future<void> _handleUserSignIn(User? user,
+      {required bool isGoogleSignIn}) async {
     if (user == null) return;
 
     final userDoc = _firestore.collection('user').doc(user.uid);
@@ -68,7 +71,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   Future<void> _signInWithEmailAndPassword() async {
     try {
       final email = _emailController.text.trim();
@@ -97,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
