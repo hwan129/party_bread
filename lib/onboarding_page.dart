@@ -35,8 +35,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
           _currentPage == 2
               ? ElevatedButton(
                   onPressed: () {
+<<<<<<< Updated upstream
                     // ¿Âº¸µù ¿Ï·á ÈÄ ¸ÞÀÎ ÆäÀÌÁö·Î ÀÌµ¿ ¼³Á¤
                     Navigator.popUntil(context, (route) => route.isFirst);
+=======
+                    // ì˜¨ë³´ë”© ì™„ë£Œ í›„ ë©”ì¸ íŽ˜ì´ì§€ë¡œ ì´ë™ ì„¤ì •
+                    Navigator.pushReplacementNamed(context, '/home');
+>>>>>>> Stashed changes
                   },
                   child: Text('Get Started'),
                 )
