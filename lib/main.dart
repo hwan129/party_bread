@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
-import 'signup_email_page.dart';
-import 'signup_phone_page.dart';
-import 'signup_name_page.dart';
-import 'signup_nickname_page.dart';
 import 'location_permission_page.dart';
 import 'onboarding_page.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,6 +8,7 @@ import 'home.dart';
 import 'profile.dart';
 import 'result.dart';
 import 'add.dart';
+import 'signup_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,11 +55,7 @@ class MyApp extends StatelessWidget {
         '/result': (context) => ResultPage(), // 카테고리, 검색 결과 페이지
         '/profile': (context) => ProfilePage(), // 프로필 페이지
         '/add': (context) => AddPage(),
-        '/signupEmail': (context) => SignupEmailPage(), // 회원가입 - 이메일 입력 페이지
-        '/signupPhone': (context) => SignupPhonePage(), // 회원가입 - 전화번호 입력 페이지
-        '/signupName': (context) => SignupNamePage(), // 회원가입 - 이름 입력 페이지
-        '/signupNickname': (context) =>
-            SignupNicknamePage(), // 회원가입 - 닉네임 입력 페이지
+        '/signup': (context) => SignupPage(),
         '/locationPermission': (context) =>
             LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
