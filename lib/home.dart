@@ -26,25 +26,25 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/result');
+                      Navigator.pushNamed(context, '/result', arguments: 0,);
                     },
                     child: const Text('배달팟빵'),
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/result');
+                      Navigator.pushNamed(context, '/result', arguments: 1,);
                     },
                     child: const Text('택시팟빵'),
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/result');
+                      Navigator.pushNamed(context, '/result', arguments: 2,);
                     },
                     child: const Text('공구팟빵'),
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/result');
+                      Navigator.pushNamed(context, '/result', arguments: 3,);
                     },
                     child: const Text('기타팟빵'),
                   ),
