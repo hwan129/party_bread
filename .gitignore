@@ -83,8 +83,7 @@ lib/generated_plugin_registrant.dart
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/gradle.properties
-android\gradle.properties
-gradle.properties
+android/gradle.properties
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -271,3 +270,12 @@ linux/flutter/generated_plugin_registrant.cc
 /linux/flutter
 /macos
 /windows
+=======
+linux/flutter/generated_plugin_registrant.h
+linux/flutter/generated_plugins.cmake
+macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugins.cmake
+android/gradle.properties
+
