@@ -50,10 +50,10 @@ class _LoginPageState extends State<LoginPage> {
         'uid': user.uid,
         'isNewUser': false, // 새로운 사용자 플래그
       });
-      print("new");
+      // print("new");
       Navigator.pushReplacementNamed(context, '/onboarding'); // 온보딩 페이지로 이동
     } else {
-      print("not new");
+      // print("not new");
       // 기존 사용자라면 isNewUser 플래그 확인
       bool isNewUser = userDocSnapshot.data()?['isNewUser'] ?? false;
       if (isNewUser) {
