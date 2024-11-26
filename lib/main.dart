@@ -9,6 +9,7 @@ import 'profile.dart';
 import 'result.dart';
 import 'add.dart';
 import 'signup_page.dart';
+import 'chat_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +61,17 @@ class MyApp extends StatelessWidget {
             LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
       },
+        onGenerateRoute: (settings) {
+          if (settings.name == '/chatting') {
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => ChatRoomPage(
+                roomId: args['roomId'], // 전달받은 roomId를 사용
+              ),
+            );
+          }
+          return null; // 정의되지 않은 경로 처리
+        },
     );
   }
 }

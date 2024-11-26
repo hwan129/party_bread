@@ -7,12 +7,11 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
-  late int categoryIndex; // 전달받은 인덱스
-  String categoryName = ''; // 카테고리 이름
-  List<Map<String, dynamic>> breads = []; // 해당 카테고리의 빵 데이터 저장
-  bool isLoading = true; // 로딩 상태
+  late int categoryIndex;
+  String categoryName = '';
+  List<Map<String, dynamic>> breads = [];
+  bool isLoading = true;
 
-  // 카테고리 목록
   final List<String> categories = ['배달팟빵', '택시팟빵', '공구팟빵', '기타팟빵'];
 
   @override
@@ -72,12 +71,22 @@ class _ResultPageState extends State<ResultPage> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 0.5, // 화면의 절반 크기로 설정
+          heightFactor: 0.5, // 화면의 절반 크기
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(), // 왼쪽 여백 확보
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
                 if (categoryName == '택시팟빵') ...[
                   Text(
                     "출발지: ${bread['pickmeup'] ?? '정보 없음'}",
@@ -104,9 +113,13 @@ class _ResultPageState extends State<ResultPage> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushNamed(
+                        context,
+                        '/chatting',
+                        arguments: {'roomId': bread['category']}, // 방 ID 전달
+                      );
                     },
-                    child: Text('닫기'),
+                    child: Text('팟빵 함께 먹기'),
                   ),
                 ),
               ],
