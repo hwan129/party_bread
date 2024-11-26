@@ -18,13 +18,11 @@ class _ResultPageState extends State<ResultPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // arguments로 전달된 인덱스를 받기
     categoryIndex = ModalRoute.of(context)?.settings.arguments as int;
-    categoryName = categories[categoryIndex]; // 인덱스에 맞는 카테고리 이름 가져오기
+    categoryName = categories[categoryIndex];
     fetchBreadData();
   }
 
-  // Firestore에서 데이터 가져오기
   Future<void> fetchBreadData() async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
@@ -33,29 +31,90 @@ class _ResultPageState extends State<ResultPage> {
           .get();
 
       setState(() {
-        // 각 문서를 Map 형태로 변환하여 저장
-        breads = querySnapshot.docs
-            .map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              // 'data' 필드에서 필요한 정보를 추출하여 반환
-              return {
-                'category': data['category'],
-                'createdAt': data['createdAt'],
-                'detail': data['data']['detail'], // data 안의 'detail' 값
-                'name': data['data']['name'],     // data 안의 'name' 값
-                'orderTime': data['data']['orderTime'], // data 안의 'orderTime' 값
-                'pickupTime': data['data']['pickupTime'], // data 안의 'pickupTime' 값
-              };
-            })
-            .toList();
-        isLoading = false; // 로딩 완료
+        breads = querySnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+
+          if (categoryName == '택시팟빵') {
+            return {
+              'category': data['category'],
+              'pickmeup': data['data']['pickmeup'],
+              'destination': data['data']['destination'],
+              'orderTime': data['data']['orderTime'],
+              'pickupTime': data['data']['pickupTime'],
+              'detail': data['data']['detail'],
+            };
+          }
+
+          return {
+            'category': data['category'],
+            'name': data['data']['name'],
+            'detail': data['data']['detail'],
+            'orderTime': data['data']['orderTime'],
+            'pickupTime': data['data']['pickupTime'],
+          };
+        }).toList();
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        isLoading = false; // 로딩 실패
+        isLoading = false;
       });
       print('오류 발생: $e');
     }
+  }
+
+  void showBreadDetails(Map<String, dynamic> bread) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.5, // 화면의 절반 크기로 설정
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (categoryName == '택시팟빵') ...[
+                  Text(
+                    "출발지: ${bread['pickmeup'] ?? '정보 없음'}",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "목적지: ${bread['destination'] ?? '정보 없음'}",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(height: 16),
+                ] else ...[
+                  Text(
+                    bread['name'] ?? '제목 없음',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+                SizedBox(height: 10),
+                Text("세부사항: ${bread['detail'] ?? '없음'}"),
+                SizedBox(height: 10),
+                Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
+                Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
+                Spacer(),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('닫기'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -64,27 +123,32 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(title: Text("$categoryName 팟빵")),
       body: Column(
         children: [
-          // ListView로 빵 목록 표시
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator()) // 로딩 중일 때 표시
+                ? Center(child: CircularProgressIndicator())
                 : breads.isEmpty
-                    ? Center(child: Text("해당 카테고리의 빵이 없습니다.")) // 빵이 없을 때 표시
+                    ? Center(child: Text("해당 카테고리의 빵이 없습니다."))
                     : ListView.builder(
                         itemCount: breads.length,
                         itemBuilder: (context, index) {
                           final bread = breads[index];
+                          if (categoryName == '택시팟빵') {
+                            final title =
+                                "${bread['pickmeup'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
+                            final subtitle = bread['detail'] ?? '세부 정보 없음';
+
+                            return ListTile(
+                              title: Text(title),
+                              subtitle: Text(subtitle),
+                              trailing: Icon(Icons.arrow_forward),
+                              onTap: () => showBreadDetails(bread),
+                            );
+                          }
                           return ListTile(
                             title: Text(bread['name'] ?? '이름 없음'),
                             subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
-                            trailing: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                                Text("픽업 시간: ${bread['pickupTime'] ?? '알 수 없음'}"),
-                              ],
-                            ),
+                            trailing: Icon(Icons.arrow_forward),
+                            onTap: () => showBreadDetails(bread),
                           );
                         },
                       ),
