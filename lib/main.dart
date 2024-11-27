@@ -3,19 +3,32 @@ import 'login_page.dart';
 import 'location_permission_page.dart';
 import 'onboarding_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'home.dart';
 import 'profile.dart';
 import 'result.dart';
 import 'add.dart';
 import 'signup_page.dart';
+import 'provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.playIntegrity,
+  );
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => GeoProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

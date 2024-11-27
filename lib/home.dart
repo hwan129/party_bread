@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+import 'provider.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -7,53 +8,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? latitude;
-  String? longitude;
-  String? errorMessage;
-
-  Future<void> getGeoData() async {
-    try {
-      // 위치 권한 확인
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            errorMessage = '위치 권한이 거부되었습니다.';
-          });
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          errorMessage = '위치 권한이 영구적으로 거부되었습니다. 설정에서 권한을 활성화해주세요.';
-        });
-        return;
-      }
-
-      // 위치 정보 가져오기
-      Position position = await Geolocator.getCurrentPosition();
-      setState(() {
-        latitude = position.latitude.toString();
-        longitude = position.longitude.toString();
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = '오류 발생: ${e.toString()}';
-        print(e.toString());
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    getGeoData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // GeoProvider의 fetchGeoData 호출
+      Provider.of<GeoProvider>(context, listen: false).fetchGeoData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final geoProvider = Provider.of<GeoProvider>(context);
     return Scaffold(
       appBar: AppBar(title: Text("Home"), actions: <Widget>[
         IconButton(
@@ -67,16 +33,16 @@ class _HomePageState extends State<HomePage> {
         children: [
           Column(
             children: [
-              if (errorMessage != null)
+              if (geoProvider.errorMessage != null)
                 Text(
-                  errorMessage!,
+                  geoProvider.errorMessage!,
                   style: const TextStyle(color: Colors.red),
                 ),
-              if (latitude != null && longitude != null)
+              if (geoProvider.latitude != null && geoProvider.longitude != null)
                 Column(
                   children: [
-                    Text('위도: $latitude'),
-                    Text('경도: $longitude'),
+                    Text('위도: ${geoProvider.latitude}'),
+                    Text('경도: ${geoProvider.longitude}'),
                   ],
                 )
               else
