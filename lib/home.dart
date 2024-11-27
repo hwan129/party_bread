@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final geoProvider = Provider.of<GeoProvider>(context);
+
     return Scaffold(
       appBar: AppBar(title: Text("Home"), actions: <Widget>[
         IconButton(
@@ -43,6 +44,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text('위도: ${geoProvider.latitude}'),
                     Text('경도: ${geoProvider.longitude}'),
+                    Text('주소: ${geoProvider.address}'),
                   ],
                 )
               else
