@@ -14,7 +14,7 @@ class GeoProvider with ChangeNotifier {
   String? get address => _address;
   String? get errorMessage => _errorMessage;
 
-  String? _API_KEY = 'AIzaSyAQ4KUztl0w0BqwRJSpf3EGWt49ascwPdQ';
+  final String _API_KEY = 'AIzaSyAQ4KUztl0w0BqwRJSpf3EGWt49ascwPdQ';
 
   Future<void> fetchGeoData() async {
     try {
@@ -23,15 +23,13 @@ class GeoProvider with ChangeNotifier {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _errorMessage = '위치 권한이 거부되었습니다.';
-          notifyListeners();
+          _setError('위치 권한이 거부되었습니다.');
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _errorMessage = '위치 권한이 영구적으로 거부되었습니다. 설정에서 권한을 활성화해주세요.';
-        notifyListeners();
+        _setError('위치 권한이 영구적으로 거부되었습니다. 설정에서 권한을 활성화해주세요.');
         return;
       }
 
@@ -41,18 +39,11 @@ class GeoProvider with ChangeNotifier {
       _longitude = position.longitude.toString();
       _errorMessage = null;
 
-      // String gpsUrl =
-      //     'https://maps.googleapis.com/maps/api/geocode/json?latlng=${_latitude},${_longitude}&key=${_API_KEY}';
-
-      // final response = await http.get(Uri.parse(gpsUrl));
-
-      // print(convert.jsonDecode(response.body));
+      // 주소 가져오기
+      await _fetchAddressFromCoordinates();
     } catch (e) {
-      _errorMessage = '오류 발생: ${e.toString()}';
-      print(e.toString());
+      _setError('오류 발생: ${e.toString()}');
     }
-
-    notifyListeners();
   }
 
   Future<void> _fetchAddressFromCoordinates() async {
@@ -62,18 +53,19 @@ class GeoProvider with ChangeNotifier {
         return;
       }
 
-      const String apiKey = 'YOUR_API_KEY'; // 여기에 API 키 입력
-      String gpsUrl =
-          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$_latitude,$_longitude&key=$apiKey';
+      final gpsUrl =
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$_latitude,$_longitude&key=$_API_KEY';
 
       final response = await http.get(Uri.parse(gpsUrl));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        // 주소 파싱
+        print('Google Maps API Response: $data');
+
         if (data['results'] != null && data['results'].isNotEmpty) {
           _address = data['results'][0]['formatted_address'];
+          _errorMessage = null;
         } else {
           _setError('주소를 찾을 수 없습니다.');
         }
@@ -83,13 +75,11 @@ class GeoProvider with ChangeNotifier {
     } catch (e) {
       _setError('주소 요청 중 오류 발생: ${e.toString()}');
     }
-
-    notifyListeners();
   }
 
   void _setError(String message) {
     _errorMessage = message;
-    _address = null; // 주소 초기화
+    _address = null;
     notifyListeners();
   }
 }
