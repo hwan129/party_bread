@@ -14,10 +14,18 @@ class GeoProvider with ChangeNotifier {
   String? get address => _address;
   String? get errorMessage => _errorMessage;
 
+  bool isLoading = true;
+
   final String _API_KEY = 'AIzaSyAQ4KUztl0w0BqwRJSpf3EGWt49ascwPdQ';
 
   Future<void> fetchGeoData() async {
     try {
+      // 위치 정보 획득 가능한지 확인
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _setError('위치 권한이 거부되었습니다.');
+        return;
+      }
       // 위치 권한 확인
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -39,10 +47,17 @@ class GeoProvider with ChangeNotifier {
       _longitude = position.longitude.toString();
       _errorMessage = null;
 
+      print('position: $position');
+
       // 주소 가져오기
       await _fetchAddressFromCoordinates();
+
+      notifyListeners();
     } catch (e) {
       _setError('오류 발생: ${e.toString()}');
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -54,7 +69,7 @@ class GeoProvider with ChangeNotifier {
       }
 
       final gpsUrl =
-          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$_latitude,$_longitude&key=$_API_KEY';
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$_latitude,$_longitude&key=$_API_KEY&language=ko';
 
       final response = await http.get(Uri.parse(gpsUrl));
 
@@ -66,6 +81,8 @@ class GeoProvider with ChangeNotifier {
         if (data['results'] != null && data['results'].isNotEmpty) {
           _address = data['results'][0]['formatted_address'];
           _errorMessage = null;
+          // isLoading = true;
+          // notifyListeners();
         } else {
           _setError('주소를 찾을 수 없습니다.');
         }
