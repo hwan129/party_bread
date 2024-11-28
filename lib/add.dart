@@ -12,6 +12,7 @@ class _AddPageState extends State<AddPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController detailController = TextEditingController();
   final TextEditingController orderTimeController = TextEditingController();
+  final TextEditingController pickMeUpController = TextEditingController();
   final TextEditingController pickupTimeController = TextEditingController();
   final TextEditingController peopleCountController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
@@ -39,12 +40,6 @@ class _AddPageState extends State<AddPage> {
                 ],
               ),
               const SizedBox(height: 20),
-              // Text(
-              //   selectedCategory.isNotEmpty
-              //       ? "선택된 카테고리: $selectedCategory"
-              //       : "카테고리를 선택해주세요!",
-              //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[700]),
-              // ),
               const SizedBox(height: 20),
               if (selectedCategory == "배달팟빵") ..._buildDeliveryFields(),
               if (selectedCategory == "택시팟빵") ..._buildTaxiFields(),
@@ -53,7 +48,7 @@ class _AddPageState extends State<AddPage> {
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: _submitData,
+                  onPressed: _showConfirmationModal,
                   child: const Text('팟빵 굽기'),
                 ),
               ),
@@ -78,11 +73,9 @@ class _AddPageState extends State<AddPage> {
       style: TextButton.styleFrom(
         backgroundColor: isSelected ? Colors.brown : Colors.white, // 선택된 버튼은 갈색, 나머지는 흰색
         foregroundColor: isSelected ? Colors.white : Colors.black, // 텍스트 색상 설정
-
       ),
       child: Text(category),
     );
-
   }
 
   // 배달팟빵
@@ -90,12 +83,14 @@ class _AddPageState extends State<AddPage> {
     return [
       Text("무엇을 먹을 건가요?", style: _fieldTitleStyle),
       Text("상호명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("음식 이름을 입력하세요", nameController),
+      _buildTextField("장충동왕족발보쌈", nameController),
       Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
       Text("주문 시간", style: _fieldTitleStyle),
-      _buildTextField("주문 시간을 입력하세요", orderTimeController),
+      _buildTimeField("주문 시간을 선택하세요", orderTimeController),
       Text("픽업 시간", style: _fieldTitleStyle),
-      _buildTextField("픽업 시간을 입력하세요", pickupTimeController),
+      _buildTimeField("픽업 시간을 선택하세요", pickupTimeController),
+      Text("픽업 장소", style: _fieldTitleStyle),
+      _buildTextField("하용조관 1층", pickMeUpController),
       Text("인원", style: _fieldTitleStyle),
       _buildTextField("인원수를 입력하세요", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
@@ -111,9 +106,9 @@ class _AddPageState extends State<AddPage> {
       _buildTextField("목적지를 입력하세요", destinationController),
       Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
       Text("탑승 시간", style: _fieldTitleStyle),
-      _buildTextField("탑승 시간을 입력하세요", timeController),
+      _buildTimeField("탑승 시간을 선택하세요", timeController),
       Text("탑승 장소", style: _fieldTitleStyle),
-      _buildTextField("탑승 장소를 입력하세요", pickupTimeController),
+      _buildTextField("탑승 장소를 입력하세요", pickMeUpController),
       Text("인원", style: _fieldTitleStyle),
       _buildTextField("인원수를 입력하세요", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
@@ -129,7 +124,7 @@ class _AddPageState extends State<AddPage> {
       _buildTextField("보들보들 치즈볶음면", nameController),
       Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTextField("11월 16일 (토) 오후 9시", timeController),
+      _buildTimeField("마감일을 선택하세요", timeController),
       Text("인원", style: _fieldTitleStyle),
       _buildTextField("인원수를 입력하세요", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
@@ -144,7 +139,7 @@ class _AddPageState extends State<AddPage> {
       _buildTextField("롤 5대5 할 사람", nameController),
       Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTextField("11월 16일 (토) 오후 9시", timeController),
+      _buildTimeField("마감일을 선택하세요", timeController),
       Text("인원", style: _fieldTitleStyle),
       _buildTextField("인원수를 입력하세요", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
@@ -166,48 +161,127 @@ class _AddPageState extends State<AddPage> {
     );
   }
 
-  // 파베에 데이터 저장
-  Future<void> _submitData() async {
+  // 시간 필드 추가
+  Widget _buildTimeField(String hint, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: hint,
+                border: OutlineInputBorder(),
+              ),
+              readOnly: true, // 입력 불가, Time Picker만 사용
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_today),
+            onPressed: () async {
+              TimeOfDay? pickedTime = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (pickedTime != null) {
+                // Time Picker에서 선택한 시간 텍스트로 설정
+                controller.text = pickedTime.format(context);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  // 팝업 모달 표시
+  void _showConfirmationModal() {
     Map<String, String> inputData = {};
 
     if (selectedCategory == "배달팟빵") {
       inputData = {
-        'name': nameController.text,
-        'orderTime': orderTimeController.text,
-        'pickupTime': pickupTimeController.text,
-        'detail': detailController.text,
+        '음식 이름': nameController.text,
+        '주문 시간': orderTimeController.text,
+        '픽업 시간': pickupTimeController.text,
+        '픽업 위치': pickMeUpController.text,
+        '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "택시팟빵") {
       inputData = {
-        'destination': destinationController.text,
-        'time': timeController.text,
-        'peopleCount' : peopleCountController.text,
-        'detail': detailController.text,
+        '목적지': destinationController.text,
+        '탑승 시간': timeController.text,
+        '탑승 장소': pickMeUpController.text,
+        '인원 수': peopleCountController.text,
+        '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "공구팟빵") {
       inputData = {
-        'name': nameController.text,
-        'time': timeController.text,
-        'peopleCount' : peopleCountController.text,
-        'detail': detailController.text,
+        '제품명': nameController.text,
+        '마감일': timeController.text,
+        '인원 수': peopleCountController.text,
+        '추가 사항': detailController.text,
       };
-    }
-    else if (selectedCategory == "기타팟빵") {
+    } else if (selectedCategory == "기타팟빵") {
       inputData = {
-        'name': nameController.text,
-        'time': timeController.text,
-        'peopleCount' : peopleCountController.text,
-        'detail': detailController.text,
+        '이름': nameController.text,
+        '마감일': timeController.text,
+        '인원 수': peopleCountController.text,
+        '추가 사항': detailController.text,
       };
     }
 
-    if (selectedCategory.isEmpty || inputData.values.any((value) => value.isEmpty)) {
+    // 모든 항목을 다 입력해야 팟빵을 구울 수 있다는 메시지
+    if (inputData.values.any((value) => value.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("모든 항목을 다 입력해야 팟빵을 구울 수 있어요😢")),
       );
       return;
     }
 
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("아래 내용이 맞나요?"),
+        content: Container(
+          width: 300,  // 너비를 300으로 설정
+          height: 300, // 높이를 400으로 설정
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: inputData.entries
+                .map((entry) => Text("${entry.key}: ${entry.value}"))
+                .toList(),
+          ),
+        ),
+        // content: Column(
+        //   crossAxisAlignment: CrossAxisAlignment.start,
+        //   children: inputData.entries
+        //       .map((entry) => Text("${entry.key}: ${entry.value}"))
+        //       .toList(),
+        // ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(); // Modal을 닫고 이전 화면으로 돌아갑니다.
+            },
+            child: Text("취소"),
+          ),
+          TextButton(
+            onPressed: () {
+              _submitData(inputData); // Firebase에 데이터 전송
+              Navigator.of(ctx).pop(); // Modal을 닫고 detail 화면으로 이동
+              Navigator.pushNamed(context, '/detail'); // 페이지 네비게이션
+            },
+            child: Text("확인"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 파이어베이스에 데이터 저장
+  Future<void> _submitData(Map<String, String> inputData) async {
     try {
       await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
@@ -230,12 +304,10 @@ class _AddPageState extends State<AddPage> {
     nameController.clear();
     detailController.clear();
     orderTimeController.clear();
+    pickMeUpController.clear();
     pickupTimeController.clear();
     destinationController.clear();
     timeController.clear();
-    // setState(() {
-    //   selectedCategory = "";
-    // });
   }
 
   // 스타일
