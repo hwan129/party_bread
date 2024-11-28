@@ -6,12 +6,18 @@ import 'dart:convert';
 class GeoProvider with ChangeNotifier {
   String? _latitude;
   String? _longitude;
-  String? _address;
+  String? _Si;
+  String? _Gu;
+  String? _Dong;
+  String? _street;
   String? _errorMessage;
 
   String? get latitude => _latitude;
   String? get longitude => _longitude;
-  String? get address => _address;
+  String? get Si => _Si;
+  String? get Gu => _Gu;
+  String? get Dong => _Dong;
+  String? get street => _street;
   String? get errorMessage => _errorMessage;
 
   bool isLoading = true;
@@ -76,10 +82,15 @@ class GeoProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        print('Google Maps API Response: $data');
+        print(
+            'Google Maps API Response: ${data['results'][0]['address_components']}');
 
         if (data['results'] != null && data['results'].isNotEmpty) {
-          _address = data['results'][0]['formatted_address'];
+          final address = data['results'][0]['address_components'];
+          _Si = address[3]['long_name'];
+          _Gu = address[2]['long_name'];
+          _Dong = address[1]['long_name'];
+          _street = address[0]['long_name'];
           _errorMessage = null;
           // isLoading = true;
           // notifyListeners();
@@ -96,7 +107,7 @@ class GeoProvider with ChangeNotifier {
 
   void _setError(String message) {
     _errorMessage = message;
-    _address = null;
+    _Si = null;
     notifyListeners();
   }
 }

@@ -24,7 +24,9 @@ class _HomePageState extends State<HomePage> {
           title: Consumer<GeoProvider>(
             builder: (context, geoProvider, child) {
               return Text(
-                geoProvider.address ?? "주소를 가져오는 중...",
+                geoProvider.Si != null
+                    ? '${geoProvider.Si} ${geoProvider.Gu} ${geoProvider.Dong} ${geoProvider.street}'
+                    : "주소를 가져오는 중...",
                 style: const TextStyle(fontSize: 16),
               );
             },
@@ -66,9 +68,9 @@ class _HomePageState extends State<HomePage> {
                         geoProvider.longitude != null)
                       Column(
                         children: [
-                          Text('위도: ${geoProvider.latitude}'),
-                          Text('경도: ${geoProvider.longitude}'),
-                          Text('주소: ${geoProvider.address}'),
+                          // Text('위도: ${geoProvider.latitude}'),
+                          // Text('경도: ${geoProvider.longitude}'),
+                          // Text('주소: ${geoProvider.address}'),
                         ],
                       )
                     else
