@@ -28,7 +28,8 @@ class _AddPageState extends State<AddPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("팟빵 종류를 선택해주세요", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text("팟빵 종류를 선택해주세요",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -71,7 +72,8 @@ class _AddPageState extends State<AddPage> {
         _clearFields(); // 다른 카테고리 선택 시 입력한 거 다 사라짐
       },
       style: TextButton.styleFrom(
-        backgroundColor: isSelected ? Colors.brown : Colors.white, // 선택된 버튼은 갈색, 나머지는 흰색
+        backgroundColor:
+            isSelected ? Colors.brown : Colors.white, // 선택된 버튼은 갈색, 나머지는 흰색
         foregroundColor: isSelected ? Colors.white : Colors.black, // 텍스트 색상 설정
       ),
       child: Text(category),
@@ -88,6 +90,12 @@ class _AddPageState extends State<AddPage> {
       Text("주문 시간", style: _fieldTitleStyle),
       _buildTimeField("주문 시간을 선택하세요", orderTimeController),
       Text("픽업 시간", style: _fieldTitleStyle),
+      IconButton(
+        icon: const Icon(Icons.map),
+        onPressed: () {
+          Navigator.pushNamed(context, '/getlocation');
+        },
+      ),
       _buildTimeField("픽업 시간을 선택하세요", pickupTimeController),
       Text("픽업 장소", style: _fieldTitleStyle),
       _buildTextField("하용조관 1층", pickMeUpController),
@@ -195,7 +203,6 @@ class _AddPageState extends State<AddPage> {
     );
   }
 
-
   // 팝업 모달 표시
   void _showConfirmationModal() {
     Map<String, String> inputData = {};
@@ -245,7 +252,7 @@ class _AddPageState extends State<AddPage> {
       builder: (ctx) => AlertDialog(
         title: Text("아래 내용이 맞나요?"),
         content: Container(
-          width: 300,  // 너비를 300으로 설정
+          width: 300, // 너비를 300으로 설정
           height: 300, // 높이를 400으로 설정
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
