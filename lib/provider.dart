@@ -4,16 +4,16 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class GeoProvider with ChangeNotifier {
-  String? _latitude;
-  String? _longitude;
+  double? _latitude;
+  double? _longitude;
   String? _Si;
   String? _Gu;
   String? _Dong;
   String? _street;
   String? _errorMessage;
 
-  String? get latitude => _latitude;
-  String? get longitude => _longitude;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
   String? get Si => _Si;
   String? get Gu => _Gu;
   String? get Dong => _Dong;
@@ -49,8 +49,8 @@ class GeoProvider with ChangeNotifier {
 
       // 위치 정보 가져오기
       Position position = await Geolocator.getCurrentPosition();
-      _latitude = position.latitude.toString();
-      _longitude = position.longitude.toString();
+      _latitude = position.latitude;
+      _longitude = position.longitude;
       _errorMessage = null;
 
       print('position: $position');

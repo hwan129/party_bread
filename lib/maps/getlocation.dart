@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+import '../provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -23,19 +25,24 @@ class GetLocation extends StatelessWidget {
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController mapController;
 
-  final LatLng _center = const LatLng(45.521563, -122.677433);
-
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
   @override
   Widget build(BuildContext context) {
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+
+    final double latitude = geoProvider.latitude ?? 37.7749; // 기본값 (샌프란시스코)
+    final double longitude = geoProvider.longitude ?? -122.4194; // 기본값 (샌프란시스코)
+
+    final LatLng _center = LatLng(latitude, longitude);
+
     return GoogleMap(
       onMapCreated: _onMapCreated,
       initialCameraPosition: CameraPosition(
         target: _center,
-        zoom: 11.0,
+        zoom: 18.0,
       ),
     );
   }
