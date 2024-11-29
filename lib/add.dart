@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'provider.dart';
 
 class AddPage extends StatefulWidget {
   @override
@@ -289,11 +291,14 @@ class _AddPageState extends State<AddPage> {
 
   // 파이어베이스에 데이터 저장
   Future<void> _submitData(Map<String, String> inputData) async {
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
     try {
       await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
         'createdAt': Timestamp.now(),
+        'lat': geoProvider.latitude,
+        'lon': geoProvider.longitude,
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("팟빵을 성공적으로 구웠어요!")),
