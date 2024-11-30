@@ -23,10 +23,10 @@ class _GetLocationState extends State<GetLocation> {
   void _updateMarker(double latitude, double longitude) {
     setState(() {
       _currentMarker = Marker(
-        markerId: MarkerId("current_location"),
+        markerId: MarkerId("selected_location"),
         position: LatLng(latitude, longitude),
-        infoWindow: InfoWindow(title: "선택된 위치"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: InfoWindow(title: "팟빵을 구울 위치"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       );
     });
   }
@@ -37,42 +37,45 @@ class _GetLocationState extends State<GetLocation> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("현재 위치"),
+        title: Text("모일 위치를 선택해주세요."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('선택 완료'),
+          ),
+        ],
       ),
-      body: geoProvider.isLoading
-          ? Center(child: CircularProgressIndicator()) // 로딩 상태 표시
-          : geoProvider.errorMessage != null
-              ? Center(child: Text(geoProvider.errorMessage!)) // 에러 메시지 표시
-              : Stack(
-                  children: [
-                    GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(
-                          geoProvider.latitude ?? 0.0,
-                          geoProvider.longitude ?? 0.0,
-                        ),
-                        zoom: 18,
-                      ),
-                      mapType: MapType.normal,
-                      onMapCreated: (controller) {
-                        _mapController = controller;
-                        _updateMarker(
-                          geoProvider.latitude!,
-                          geoProvider.longitude!,
-                        );
-                      },
-                      markers: _currentMarker != null ? {_currentMarker!} : {},
-                      onTap: (LatLng coordinate) {
-                        _mapController.animateCamera(
-                          CameraUpdate.newLatLng(coordinate),
-                        );
-                        _updateMarker(
-                            coordinate.latitude, coordinate.longitude);
-                        print(coordinate); // 마커 찍은 위치
-                      },
-                    ),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(
+                geoProvider.latitude ?? 0.0,
+                geoProvider.longitude ?? 0.0,
+              ),
+              zoom: 18,
+            ),
+            mapType: MapType.normal,
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _updateMarker(
+                geoProvider.latitude!,
+                geoProvider.longitude!,
+              );
+            },
+            markers: _currentMarker != null ? {_currentMarker!} : {},
+            onTap: (LatLng coordinate) {
+              _mapController.animateCamera(
+                CameraUpdate.newLatLng(coordinate),
+              );
+              _updateMarker(coordinate.latitude, coordinate.longitude);
+              print(coordinate); // 마커 찍은 위치
+            },
+          ),
+        ],
+      ),
     );
   }
 }
