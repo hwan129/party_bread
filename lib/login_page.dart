@@ -45,15 +45,18 @@ class _LoginPageState extends State<LoginPage> {
     if (!userDocSnapshot.exists) {
       // 사용자가 처음 로그인하는 경우
       await userDoc.set({
-        'name': isGoogleSignIn ? user.displayName : null,
-        'email': user.email,
-        'uid': user.uid,
-        'isNewUser': false, // 새로운 사용자 플래그
+        'name': isGoogleSignIn ? user.displayName : '사용자 이름', // 이름 설정
+        'nickname': isGoogleSignIn ? user.displayName : '사용자 이름', // 닉네임 추가
+        'email': user.email ?? '이메일 없음', // 이메일 설정
+        'uid': user.uid, // 사용자 UID
+        'isNewUser': true, // 새로운 사용자 플래그
+        'interactedDocs': [], // 빈 활동 내역 배열 추가
+        'profileImage':
+            "https://firebasestorage.googleapis.com/v0/b/party-bread.firebasestorage.app/o/potbbang.png?alt=media&token=d0f000c8-3dee-4cb0-8461-4d7bbf136c4b", // 기본 프로필 이미지
       });
-      // print("new");
-      Navigator.pushReplacementNamed(context, '/onboarding'); // 온보딩 페이지로 이동
+      // 온보딩 페이지로 이동
+      Navigator.pushReplacementNamed(context, '/onboarding');
     } else {
-      // print("not new");
       // 기존 사용자라면 isNewUser 플래그 확인
       bool isNewUser = userDocSnapshot.data()?['isNewUser'] ?? false;
       if (isNewUser) {
@@ -70,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
+
 
   Future<void> _signInWithEmailAndPassword() async {
     try {
