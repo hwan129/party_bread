@@ -36,20 +36,21 @@ class _ResultPageState extends State<ResultPage> {
           if (categoryName == '택시팟빵') {
             return {
               'category': data['category'],
-              'pickmeup': data['data']['pickmeup'],
-              'destination': data['data']['destination'],
-              'orderTime': data['data']['orderTime'],
-              'pickupTime': data['data']['pickupTime'],
-              'detail': data['data']['detail'],
+              'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
+              'destination': data['data']['목적지'], // 수정된 변수명
+              'time': data['data']['탑승 시간'], // 수정된 변수명
+              'peopleCount': data['data']['인원 수'], // 수정된 변수명
+              'detail': data['data']['추가 사항'], // 수정된 변수명
             };
           }
 
           return {
             'category': data['category'],
-            'name': data['data']['name'],
-            'detail': data['data']['detail'],
-            'orderTime': data['data']['orderTime'],
-            'pickupTime': data['data']['pickupTime'],
+            'name': data['data']['음식 이름'], // 수정된 변수명
+            'orderTime': data['data']['주문 시간'], // 수정된 변수명
+            'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+            'peopleCount': data['data']['인원 수'], // 수정된 변수명
+            'detail': data['data']['추가 사항'], // 수정된 변수명
           };
         }).toList();
         isLoading = false;
@@ -71,7 +72,7 @@ class _ResultPageState extends State<ResultPage> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 0.5, // 화면의 절반 크기
+          heightFactor: 0.5,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -80,7 +81,7 @@ class _ResultPageState extends State<ResultPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(), // 왼쪽 여백 확보
+                    const SizedBox(),
                     IconButton(
                       icon: Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
@@ -89,7 +90,7 @@ class _ResultPageState extends State<ResultPage> {
                 ),
                 if (categoryName == '택시팟빵') ...[
                   Text(
-                    "출발지: ${bread['pickmeup'] ?? '정보 없음'}",
+                    "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 8),
@@ -116,7 +117,7 @@ class _ResultPageState extends State<ResultPage> {
                       Navigator.pushNamed(
                         context,
                         '/chatting',
-                        arguments: {'roomId': bread['category']}, // 방 ID 전달
+                        arguments: {'roomId': bread['category']},
                       );
                     },
                     child: Text('팟빵 함께 먹기'),
@@ -147,7 +148,7 @@ class _ResultPageState extends State<ResultPage> {
                           final bread = breads[index];
                           if (categoryName == '택시팟빵') {
                             final title =
-                                "${bread['pickmeup'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
+                                "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
                             final subtitle = bread['detail'] ?? '세부 정보 없음';
 
                             return ListTile(
