@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'provider.dart';
 
 class AddPage extends StatefulWidget {
   @override
@@ -20,6 +22,11 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+
+    print(
+        'add position : ${geoProvider.selectedLatitude} ${geoProvider.selectedLongitude}');
+
     return Scaffold(
       appBar: AppBar(title: Text("Add")),
       body: SingleChildScrollView(
@@ -42,10 +49,18 @@ class _AddPageState extends State<AddPage> {
               ),
               const SizedBox(height: 20),
               const SizedBox(height: 20),
-              if (selectedCategory == "배달팟빵") ..._buildDeliveryFields(),
-              if (selectedCategory == "택시팟빵") ..._buildTaxiFields(),
-              if (selectedCategory == "공구팟빵") ..._buildShoppingFields(),
-              if (selectedCategory == "기타팟빵") ..._buildOtherFields(),
+              if (selectedCategory == "배달팟빵")
+                ..._buildDeliveryFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
+              if (selectedCategory == "택시팟빵")
+                ..._buildTaxiFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
+              if (selectedCategory == "공구팟빵")
+                ..._buildShoppingFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
+              if (selectedCategory == "기타팟빵")
+                ..._buildOtherFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
@@ -81,7 +96,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 배달팟빵
-  List<Widget> _buildDeliveryFields() {
+  List<Widget> _buildDeliveryFields(double latitude, double longitude) {
     return [
       Text("무엇을 먹을 건가요?", style: _fieldTitleStyle),
       Text("상호명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
@@ -107,7 +122,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 택시팟빵
-  List<Widget> _buildTaxiFields() {
+  List<Widget> _buildTaxiFields(double latitude, double longitude) {
     return [
       Text("어디로 갈 건가요?", style: _fieldTitleStyle),
       Text("장소는 상세하게 적는 게 좋아요", style: _subTitleStyle),
@@ -125,7 +140,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 공구팟빵
-  List<Widget> _buildShoppingFields() {
+  List<Widget> _buildShoppingFields(double latitude, double longitude) {
     return [
       Text("어떤 물건인가요?", style: _fieldTitleStyle),
       Text("제품명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
@@ -141,7 +156,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 기타팟빵
-  List<Widget> _buildOtherFields() {
+  List<Widget> _buildOtherFields(double latitude, double longitude) {
     return [
       Text("무엇을 할 건가요?", style: _fieldTitleStyle),
       _buildTextField("롤 5대5 할 사람", nameController),
@@ -289,11 +304,16 @@ class _AddPageState extends State<AddPage> {
 
   // 파이어베이스에 데이터 저장
   Future<void> _submitData(Map<String, String> inputData) async {
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
     try {
       await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
         'createdAt': Timestamp.now(),
+        'lat': geoProvider.latitude,
+        'lon': geoProvider.longitude,
+        'selected_lat': geoProvider.selectedLatitude,
+        'selected_lon': geoProvider.selectedLongitude,
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("팟빵을 성공적으로 구웠어요!")),
