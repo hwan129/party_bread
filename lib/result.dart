@@ -9,18 +9,16 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
-  late int categoryIndex; // 전달받은 인덱스
-  String categoryName = ''; // 카테고리 이름
-  List<Map<String, dynamic>> breads = []; // 해당 카테고리의 빵 데이터 저장
-  bool isLoading = true; // 로딩 상태
+  late int categoryIndex;
+  String categoryName = '';
+  List<Map<String, dynamic>> breads = [];
+  bool isLoading = true;
 
-  // 카테고리 목록
   final List<String> categories = ['배달팟빵', '택시팟빵', '공구팟빵', '기타팟빵'];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // arguments로 전달된 인덱스를 받기
     categoryIndex = ModalRoute.of(context)?.settings.arguments as int;
     categoryName = categories[categoryIndex]; // 인덱스에 맞는 카테고리 이름 가져오기
 
@@ -30,7 +28,6 @@ class _ResultPageState extends State<ResultPage> {
     fetchBreadData();
   }
 
-  // Firestore에서 데이터 가져오기
   Future<void> fetchBreadData() async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
@@ -39,27 +36,106 @@ class _ResultPageState extends State<ResultPage> {
           .get();
 
       setState(() {
-        // 각 문서를 Map 형태로 변환하여 저장
+
         breads = querySnapshot.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
-          // 'data' 필드에서 필요한 정보를 추출하여 반환
+
+          if (categoryName == '택시팟빵') {
+            return {
+              'category': data['category'],
+              'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
+              'destination': data['data']['목적지'], // 수정된 변수명
+              'time': data['data']['탑승 시간'], // 수정된 변수명
+              'peopleCount': data['data']['인원 수'], // 수정된 변수명
+              'detail': data['data']['추가 사항'], // 수정된 변수명
+            };
+          }
+
           return {
             'category': data['category'],
-            'createdAt': data['createdAt'],
-            'detail': data['data']['detail'], // data 안의 'detail' 값
-            'name': data['data']['name'], // data 안의 'name' 값
-            'orderTime': data['data']['orderTime'], // data 안의 'orderTime' 값
-            'pickupTime': data['data']['pickupTime'], // data 안의 'pickupTime' 값
+            'name': data['data']['음식 이름'], // 수정된 변수명
+            'orderTime': data['data']['주문 시간'], // 수정된 변수명
+            'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+            'peopleCount': data['data']['인원 수'], // 수정된 변수명
+            'detail': data['data']['추가 사항'], // 수정된 변수명
           };
         }).toList();
-        isLoading = false; // 로딩 완료
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        isLoading = false; // 로딩 실패
+        isLoading = false;
       });
       print('오류 발생: $e');
     }
+  }
+
+  void showBreadDetails(Map<String, dynamic> bread) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.5,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                if (categoryName == '택시팟빵') ...[
+                  Text(
+                    "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "목적지: ${bread['destination'] ?? '정보 없음'}",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(height: 16),
+                ] else ...[
+                  Text(
+                    bread['name'] ?? '제목 없음',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+                SizedBox(height: 10),
+                Text("세부사항: ${bread['detail'] ?? '없음'}"),
+                SizedBox(height: 10),
+                Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
+                Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
+                Spacer(),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/chatting',
+                        arguments: {'roomId': bread['category']},
+                      );
+                    },
+                    child: Text('팟빵 함께 먹기'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -68,29 +144,33 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(title: Text("$categoryName 팟빵")),
       body: Column(
         children: [
-          // ListView로 빵 목록 표시
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator()) // 로딩 중일 때 표시
+                ? Center(child: CircularProgressIndicator())
                 : breads.isEmpty
-                    ? Center(child: Text("해당 카테고리의 빵이 없습니다.")) // 빵이 없을 때 표시
+                    ? Center(child: Text("해당 카테고리의 빵이 없습니다."))
                     : ListView.builder(
                         itemCount: breads.length,
                         itemBuilder: (context, index) {
                           final bread = breads[index];
+                          if (categoryName == '택시팟빵') {
+                            final title =
+                                "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
+                            final subtitle = bread['detail'] ?? '세부 정보 없음';
+
+                            return ListTile(
+                              title: Text(title),
+                              subtitle: Text(subtitle),
+                              trailing: Icon(Icons.arrow_forward),
+                              onTap: () => showBreadDetails(bread),
+                            );
+                          }
                           return ListTile(
                             title: Text(bread['name'] ?? '이름 없음'),
                             subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
-                            trailing: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                    "주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                                Text(
-                                    "픽업 시간: ${bread['pickupTime'] ?? '알 수 없음'}"),
-                              ],
-                            ),
+
+                            trailing: Icon(Icons.arrow_forward),
+                            onTap: () => showBreadDetails(bread),
                           );
                         },
                       ),
