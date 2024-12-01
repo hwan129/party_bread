@@ -17,7 +17,18 @@ class _GetLocationState extends State<GetLocation> {
   void initState() {
     super.initState();
     final geoProvider = Provider.of<GeoProvider>(context, listen: false);
-    geoProvider.fetchGeoData(); // 앱 시작 시 위치 정보 가져오기
+    geoProvider.fetchGeoData().then((_) {
+      setState(() {
+        _currentMarker = Marker(
+          markerId: MarkerId("selected_location"),
+          position: LatLng(geoProvider.selectedLatitude ?? 0,
+              geoProvider.selectedLongitude ?? 0),
+          infoWindow: InfoWindow(title: "팟빵을 구울 위치"),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        );
+        print('first position: $_currentMarker');
+      });
+    });
   }
 
   void _updateMarker(double latitude, double longitude) {
@@ -52,24 +63,26 @@ class _GetLocationState extends State<GetLocation> {
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: LatLng(
-                geoProvider.latitude ?? 0.0,
-                geoProvider.longitude ?? 0.0,
+                geoProvider.selectedLatitude ?? geoProvider.latitude!,
+                geoProvider.selectedLongitude ?? geoProvider.longitude!,
               ),
               zoom: 18,
             ),
             mapType: MapType.normal,
             onMapCreated: (controller) {
               _mapController = controller;
-              _updateMarker(
-                geoProvider.latitude!,
-                geoProvider.longitude!,
-              );
+              // _updateMarker(
+              //   geoProvider.latitude!,
+              //   geoProvider.longitude!,
+              // );
             },
             markers: _currentMarker != null ? {_currentMarker!} : {},
             onTap: (LatLng coordinate) {
               _mapController.animateCamera(
                 CameraUpdate.newLatLng(coordinate),
               );
+              geoProvider.updateLocation(
+                  coordinate.latitude, coordinate.longitude);
               _updateMarker(coordinate.latitude, coordinate.longitude);
               print(coordinate); // 마커 찍은 위치
             },

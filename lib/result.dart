@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../provider.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -21,6 +23,10 @@ class _ResultPageState extends State<ResultPage> {
     // arguments로 전달된 인덱스를 받기
     categoryIndex = ModalRoute.of(context)?.settings.arguments as int;
     categoryName = categories[categoryIndex]; // 인덱스에 맞는 카테고리 이름 가져오기
+
+    // 위치 초기화
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+    geoProvider.updateLocation(geoProvider.latitude!, geoProvider.longitude!);
     fetchBreadData();
   }
 
@@ -34,20 +40,18 @@ class _ResultPageState extends State<ResultPage> {
 
       setState(() {
         // 각 문서를 Map 형태로 변환하여 저장
-        breads = querySnapshot.docs
-            .map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              // 'data' 필드에서 필요한 정보를 추출하여 반환
-              return {
-                'category': data['category'],
-                'createdAt': data['createdAt'],
-                'detail': data['data']['detail'], // data 안의 'detail' 값
-                'name': data['data']['name'],     // data 안의 'name' 값
-                'orderTime': data['data']['orderTime'], // data 안의 'orderTime' 값
-                'pickupTime': data['data']['pickupTime'], // data 안의 'pickupTime' 값
-              };
-            })
-            .toList();
+        breads = querySnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          // 'data' 필드에서 필요한 정보를 추출하여 반환
+          return {
+            'category': data['category'],
+            'createdAt': data['createdAt'],
+            'detail': data['data']['detail'], // data 안의 'detail' 값
+            'name': data['data']['name'], // data 안의 'name' 값
+            'orderTime': data['data']['orderTime'], // data 안의 'orderTime' 값
+            'pickupTime': data['data']['pickupTime'], // data 안의 'pickupTime' 값
+          };
+        }).toList();
         isLoading = false; // 로딩 완료
       });
     } catch (e) {
@@ -81,8 +85,10 @@ class _ResultPageState extends State<ResultPage> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                                Text("픽업 시간: ${bread['pickupTime'] ?? '알 수 없음'}"),
+                                Text(
+                                    "주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
+                                Text(
+                                    "픽업 시간: ${bread['pickupTime'] ?? '알 수 없음'}"),
                               ],
                             ),
                           );

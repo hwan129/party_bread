@@ -12,6 +12,9 @@ class GeoProvider with ChangeNotifier {
   String? _street;
   String? _errorMessage;
 
+  double? _selectedLatitude;
+  double? _selectedLongitude;
+
   double? get latitude => _latitude;
   double? get longitude => _longitude;
   String? get Si => _Si;
@@ -19,6 +22,9 @@ class GeoProvider with ChangeNotifier {
   String? get Dong => _Dong;
   String? get street => _street;
   String? get errorMessage => _errorMessage;
+
+  double? get selectedLatitude => _selectedLatitude;
+  double? get selectedLongitude => _selectedLongitude;
 
   bool isLoading = true;
 
@@ -103,6 +109,12 @@ class GeoProvider with ChangeNotifier {
     } catch (e) {
       _setError('주소 요청 중 오류 발생: ${e.toString()}');
     }
+  }
+
+  void updateLocation(double lat, double lon) {
+    _selectedLatitude = lat;
+    _selectedLongitude = lon;
+    notifyListeners(); // 위치가 변경될 때마다 UI를 갱신
   }
 
   void _setError(String message) {
