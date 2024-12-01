@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'provider.dart';
+
 
 class AddPage extends StatefulWidget {
   @override
@@ -21,6 +24,11 @@ class _AddPageState extends State<AddPage> {
 
   @override
   Widget build(BuildContext context) {
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+
+    print(
+        'add position : ${geoProvider.selectedLatitude} ${geoProvider.selectedLongitude}');
+
     return Scaffold(
       appBar: AppBar(title: Text("Add")),
       body: SingleChildScrollView(
@@ -29,7 +37,8 @@ class _AddPageState extends State<AddPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("팟빵 종류를 선택해주세요", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text("팟빵 종류를 선택해주세요",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -42,10 +51,18 @@ class _AddPageState extends State<AddPage> {
               ),
               const SizedBox(height: 20),
               const SizedBox(height: 20),
-              if (selectedCategory == "배달팟빵") ..._buildDeliveryFields(),
-              if (selectedCategory == "택시팟빵") ..._buildTaxiFields(),
-              if (selectedCategory == "공구팟빵") ..._buildShoppingFields(),
-              if (selectedCategory == "기타팟빵") ..._buildOtherFields(),
+              if (selectedCategory == "배달팟빵")
+                ..._buildDeliveryFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
+              if (selectedCategory == "택시팟빵")
+                ..._buildTaxiFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
+              if (selectedCategory == "공구팟빵")
+                ..._buildShoppingFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
+              if (selectedCategory == "기타팟빵")
+                ..._buildOtherFields(
+                    geoProvider.latitude!, geoProvider.longitude!),
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
@@ -72,7 +89,8 @@ class _AddPageState extends State<AddPage> {
         _clearFields(); // 다른 카테고리 선택 시 입력한 거 다 사라짐
       },
       style: TextButton.styleFrom(
-        backgroundColor: isSelected ? Colors.brown : Colors.white, // 선택된 버튼은 갈색, 나머지는 흰색
+        backgroundColor:
+            isSelected ? Colors.brown : Colors.white, // 선택된 버튼은 갈색, 나머지는 흰색
         foregroundColor: isSelected ? Colors.white : Colors.black, // 텍스트 색상 설정
       ),
       child: Text(category),
@@ -80,7 +98,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 배달팟빵
-  List<Widget> _buildDeliveryFields() {
+  List<Widget> _buildDeliveryFields(double latitude, double longitude) {
     return [
       Text("무엇을 먹을 건가요?", style: _fieldTitleStyle),
       Text("상호명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
@@ -89,6 +107,12 @@ class _AddPageState extends State<AddPage> {
       Text("주문 시간", style: _fieldTitleStyle),
       _buildTimeField("주문 시간을 선택하세요", orderTimeController),
       Text("픽업 시간", style: _fieldTitleStyle),
+      IconButton(
+        icon: const Icon(Icons.map),
+        onPressed: () {
+          Navigator.pushNamed(context, '/getlocation');
+        },
+      ),
       _buildTimeField("픽업 시간을 선택하세요", pickupTimeController),
       Text("픽업 장소", style: _fieldTitleStyle),
       _buildTextField("하용조관 1층", pickMeUpController),
@@ -100,7 +124,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 택시팟빵
-  List<Widget> _buildTaxiFields() {
+  List<Widget> _buildTaxiFields(double latitude, double longitude) {
     return [
       Text("어디로 갈 건가요?", style: _fieldTitleStyle),
       Text("장소는 상세하게 적는 게 좋아요", style: _subTitleStyle),
@@ -118,7 +142,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 공구팟빵
-  List<Widget> _buildShoppingFields() {
+  List<Widget> _buildShoppingFields(double latitude, double longitude) {
     return [
       Text("어떤 물건인가요?", style: _fieldTitleStyle),
       Text("제품명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
@@ -134,7 +158,7 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 기타팟빵
-  List<Widget> _buildOtherFields() {
+  List<Widget> _buildOtherFields(double latitude, double longitude) {
     return [
       Text("무엇을 할 건가요?", style: _fieldTitleStyle),
       _buildTextField("롤 5대5 할 사람", nameController),
@@ -196,7 +220,6 @@ class _AddPageState extends State<AddPage> {
     );
   }
 
-
   // 팝업 모달 표시
   void _showConfirmationModal() {
     Map<String, String> inputData = {};
@@ -246,7 +269,7 @@ class _AddPageState extends State<AddPage> {
       builder: (ctx) => AlertDialog(
         title: Text("아래 내용이 맞나요?"),
         content: Container(
-          width: 300,  // 너비를 300으로 설정
+          width: 300, // 너비를 300으로 설정
           height: 300, // 높이를 400으로 설정
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,12 +307,17 @@ class _AddPageState extends State<AddPage> {
   // 파이어베이스에 데이터 저장
   // 파이어베이스에 데이터 저장 및 유저 interactedDocs 업데이트
   Future<void> _submitData(Map<String, String> inputData) async {
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
     try {
       // Firestore에 팟빵 데이터 추가
       DocumentReference docRef = await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
         'createdAt': Timestamp.now(),
+        'lat': geoProvider.latitude,
+        'lon': geoProvider.longitude,
+        'selected_lat': geoProvider.selectedLatitude,
+        'selected_lon': geoProvider.selectedLongitude,
       });
 
       // 현재 유저 가져오기

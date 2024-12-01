@@ -13,6 +13,7 @@ import 'add.dart';
 import 'signup_page.dart';
 import 'chat_page.dart';
 import 'provider.dart';
+import 'maps/getlocation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +74,7 @@ class MyApp extends StatelessWidget {
         '/locationPermission': (context) =>
             LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
+        '/getlocation': (context) => GetLocation(), // 지도에서 위치 가져오는 페이지
       },
         onGenerateRoute: (settings) {
           if (settings.name == '/chatting') {

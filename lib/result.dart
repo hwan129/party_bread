@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../provider.dart';
 
 class ResultPage extends StatefulWidget {
   @override
@@ -18,7 +20,11 @@ class _ResultPageState extends State<ResultPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     categoryIndex = ModalRoute.of(context)?.settings.arguments as int;
-    categoryName = categories[categoryIndex];
+    categoryName = categories[categoryIndex]; // 인덱스에 맞는 카테고리 이름 가져오기
+
+    // 위치 초기화
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+    geoProvider.updateLocation(geoProvider.latitude!, geoProvider.longitude!);
     fetchBreadData();
   }
 
@@ -30,6 +36,7 @@ class _ResultPageState extends State<ResultPage> {
           .get();
 
       setState(() {
+
         breads = querySnapshot.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
 
@@ -161,6 +168,7 @@ class _ResultPageState extends State<ResultPage> {
                           return ListTile(
                             title: Text(bread['name'] ?? '이름 없음'),
                             subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
+
                             trailing: Icon(Icons.arrow_forward),
                             onTap: () => showBreadDetails(bread),
                           );

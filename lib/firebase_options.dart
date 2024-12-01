@@ -67,9 +67,11 @@ class DefaultFirebaseOptions {
     projectId: 'party-bread',
     databaseURL: 'https://party-bread-default-rtdb.firebaseio.com',
     storageBucket: 'party-bread.firebasestorage.app',
-    androidClientId: '1006487071210-gub9qgjmslni662vqee2ar4839ehp7bk.apps.googleusercontent.com',
-    iosClientId: '1006487071210-eeqmlgkjrp2ph5pkk25k9h514ue7msr4.apps.googleusercontent.com',
-    iosBundleId: 'com.example.partyBread',
+    androidClientId:
+        '1006487071210-gub9qgjmslni662vqee2ar4839ehp7bk.apps.googleusercontent.com',
+    iosClientId:
+        '1006487071210-eeqmlgkjrp2ph5pkk25k9h514ue7msr4.apps.googleusercontent.com',
+    iosBundleId: 'com.example.party_bread',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -79,9 +81,11 @@ class DefaultFirebaseOptions {
     projectId: 'party-bread',
     databaseURL: 'https://party-bread-default-rtdb.firebaseio.com',
     storageBucket: 'party-bread.firebasestorage.app',
-    androidClientId: '1006487071210-gub9qgjmslni662vqee2ar4839ehp7bk.apps.googleusercontent.com',
-    iosClientId: '1006487071210-eeqmlgkjrp2ph5pkk25k9h514ue7msr4.apps.googleusercontent.com',
-    iosBundleId: 'com.example.partyBread',
+    androidClientId:
+        '1006487071210-gub9qgjmslni662vqee2ar4839ehp7bk.apps.googleusercontent.com',
+    iosClientId:
+        '1006487071210-eeqmlgkjrp2ph5pkk25k9h514ue7msr4.apps.googleusercontent.com',
+    iosBundleId: 'com.example.party_bread',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

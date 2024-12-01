@@ -4,21 +4,27 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class GeoProvider with ChangeNotifier {
-  String? _latitude;
-  String? _longitude;
+  double? _latitude;
+  double? _longitude;
   String? _Si;
   String? _Gu;
   String? _Dong;
   String? _street;
   String? _errorMessage;
 
-  String? get latitude => _latitude;
-  String? get longitude => _longitude;
+  double? _selectedLatitude;
+  double? _selectedLongitude;
+
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
   String? get Si => _Si;
   String? get Gu => _Gu;
   String? get Dong => _Dong;
   String? get street => _street;
   String? get errorMessage => _errorMessage;
+
+  double? get selectedLatitude => _selectedLatitude;
+  double? get selectedLongitude => _selectedLongitude;
 
   bool isLoading = true;
 
@@ -49,8 +55,8 @@ class GeoProvider with ChangeNotifier {
 
       // 위치 정보 가져오기
       Position position = await Geolocator.getCurrentPosition();
-      _latitude = position.latitude.toString();
-      _longitude = position.longitude.toString();
+      _latitude = position.latitude;
+      _longitude = position.longitude;
       _errorMessage = null;
 
       print('position: $position');
@@ -103,6 +109,12 @@ class GeoProvider with ChangeNotifier {
     } catch (e) {
       _setError('주소 요청 중 오류 발생: ${e.toString()}');
     }
+  }
+
+  void updateLocation(double lat, double lon) {
+    _selectedLatitude = lat;
+    _selectedLongitude = lon;
+    notifyListeners(); // 위치가 변경될 때마다 UI를 갱신
   }
 
   void _setError(String message) {
