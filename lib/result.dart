@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../provider.dart';
 
 class ResultPage extends StatefulWidget {
@@ -55,7 +56,54 @@ class _ResultPageState extends State<ResultPage> {
               double distance =
                   calculateDistance(userLat, userLon, selectedLat, selectedLon);
 
-              if (distance <= 500) {
+              // 시간 데이터 처리
+              final String? timeText = data['data']['픽업 시간'] ??
+                  data['data']['탑승 시간'] ??
+                  data['data']['마감일'];
+              print('time text : ${timeText}');
+
+              if (timeText != null) {
+                try {
+                  // 시간 형식 검증
+                  final timeRegex = RegExp(r'^\d{1,2}:\d{2} (AM|PM)$');
+                  if (!timeRegex.hasMatch(timeText)) {
+                    print("시간 형식이 올바르지 않습니다: $timeText");
+                    return null;
+                  }
+
+                  final DateTime now = DateTime.now();
+                  print("현재 시간: $now");
+
+                  // 시간 문자열을 24시간 형식으로 변환
+                  final DateTime itemTime =
+                      DateFormat('hh:mm a', 'en_US').parse(timeText);
+                  final String formattedTime =
+                      DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
+                  print("픽업 시간 (24시간 형식): $formattedTime");
+
+                  // 현재 날짜에 변환된 시간 적용
+                  final DateTime itemDateTime = DateTime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    itemTime.hour,
+                    itemTime.minute,
+                  );
+
+                  print("현재 날짜에 맞춘 시간: $itemDateTime");
+
+                  // 변환된 시간과 현재 시간 비교
+                  if (itemDateTime.isBefore(now)) {
+                    print("입력된 시간이 이미 지났습니다.");
+                    return null;
+                  }
+                } catch (e) {
+                  print("시간 변환 중 오류 발생: $e");
+                  return null;
+                }
+              }
+
+              if (distance <= 1000) {
                 if (categoryName == '택시팟빵') {
                   return {
                     'category': data['category'],
