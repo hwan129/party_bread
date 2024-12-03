@@ -56,7 +56,6 @@ class _HomePageState extends State<HomePage> {
               final String? timeText = data['data']['픽업 시간'] ??
                   data['data']['탑승 시간'] ??
                   data['data']['마감일'];
-              print('time text : ${timeText}');
 
               if (timeText != null) {
                 try {
@@ -68,14 +67,14 @@ class _HomePageState extends State<HomePage> {
                   }
 
                   final DateTime now = DateTime.now();
-                  print("현재 시간: $now");
+                  // print("현재 시간: $now");
 
                   // 시간 문자열을 24시간 형식으로 변환
                   final DateTime itemTime =
                       DateFormat('hh:mm a', 'en_US').parse(timeText);
-                  final String formattedTime =
-                      DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
-                  print("픽업 시간 (24시간 형식): $formattedTime");
+                  // final String formattedTime =
+                  //     DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
+                  // print("픽업 시간 (24시간 형식): $formattedTime");
 
                   // 현재 날짜에 변환된 시간 적용
                   final DateTime itemDateTime = DateTime(
@@ -208,6 +207,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: Padding(
+            padding: EdgeInsets.fromLTRB(7, 0, 0, 0),
+            child: Image.asset('assets/image/potbbang_ko.png'),
+          ),
           title: Consumer<GeoProvider>(
             builder: (context, geoProvider, child) {
               return Text(
