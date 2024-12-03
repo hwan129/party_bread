@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import '../provider.dart';
 
@@ -28,38 +29,58 @@ class _ResultPageState extends State<ResultPage> {
     fetchBreadData();
   }
 
+  double calculateDistance(
+      double startLat, double startLon, double endLat, double endLon) {
+    return Geolocator.distanceBetween(startLat, startLon, endLat, endLon);
+  }
+
   Future<void> fetchBreadData() async {
     try {
+      final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+      final userLat = geoProvider.latitude!;
+      final userLon = geoProvider.longitude!;
+
       final querySnapshot = await FirebaseFirestore.instance
           .collection('bread')
           .where('category', isEqualTo: categoryName)
           .get();
 
       setState(() {
+        breads = querySnapshot.docs
+            .map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final selectedLat = data['selected_lat'] ?? 0.0;
+              final selectedLon = data['selected_lon'] ?? 0.0;
 
-        breads = querySnapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
+              double distance =
+                  calculateDistance(userLat, userLon, selectedLat, selectedLon);
 
-          if (categoryName == '택시팟빵') {
-            return {
-              'category': data['category'],
-              'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
-              'destination': data['data']['목적지'], // 수정된 변수명
-              'time': data['data']['탑승 시간'], // 수정된 변수명
-              'peopleCount': data['data']['인원 수'], // 수정된 변수명
-              'detail': data['data']['추가 사항'], // 수정된 변수명
-            };
-          }
+              if (distance <= 500) {
+                if (categoryName == '택시팟빵') {
+                  return {
+                    'category': data['category'],
+                    'pickMeUp': data['data']['픽업 위치'],
+                    'destination': data['data']['목적지'],
+                    'time': data['data']['탑승 시간'],
+                    'peopleCount': data['data']['인원 수'],
+                    'detail': data['data']['추가 사항'],
+                  };
+                }
 
-          return {
-            'category': data['category'],
-            'name': data['data']['음식 이름'], // 수정된 변수명
-            'orderTime': data['data']['주문 시간'], // 수정된 변수명
-            'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
-            'peopleCount': data['data']['인원 수'], // 수정된 변수명
-            'detail': data['data']['추가 사항'], // 수정된 변수명
-          };
-        }).toList();
+                return {
+                  'category': data['category'],
+                  'name': data['data']['음식 이름'], // 수정된 변수명
+                  'orderTime': data['data']['주문 시간'], // 수정된 변수명
+                  'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+                  'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                  'detail': data['data']['추가 사항'], // 수정된 변수명
+                };
+              }
+            })
+            .where((bread) => bread != null) // null 제거
+            .cast<Map<String, dynamic>>() // 명시적 캐스팅
+            .toList();
+
         isLoading = false;
       });
     } catch (e) {
@@ -168,7 +189,6 @@ class _ResultPageState extends State<ResultPage> {
                           return ListTile(
                             title: Text(bread['name'] ?? '이름 없음'),
                             subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
-
                             trailing: Icon(Icons.arrow_forward),
                             onTap: () => showBreadDetails(bread),
                           );
