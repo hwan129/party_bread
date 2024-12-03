@@ -293,7 +293,7 @@ class _AddPageState extends State<AddPage> {
             onPressed: () {
               _submitData(inputData); // Firebase에 데이터 전송
               Navigator.of(ctx).pop(); // Modal을 닫고 detail 화면으로 이동
-              Navigator.pushNamed(context, '/detail'); // 페이지 네비게이션
+              Navigator.pop(ctx); // 페이지 네비게이션
             },
             child: Text("확인"),
           ),
