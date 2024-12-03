@@ -244,95 +244,254 @@ class _HomePageState extends State<HomePage> {
             );
           }
           if (geoProvider.latitude != null && geoProvider.longitude != null) {
-            return Column(
-              children: [
-                Text("곧 식어버리는 팟빵들이에요."),
-                Text("완료되기까지"),
-                Text("시간이 얼마남지 않았으니 서두르세요!"),
-                if (geoProvider.errorMessage != null)
+            return Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    geoProvider.errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                    "곧 식어버리는 팟빵들이에요.",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF574142),
+                    ),
                   ),
-                if (breads.isNotEmpty)
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: breads.length,
-                      itemBuilder: (context, index) {
-                        final bread = breads[index];
-                        if (bread['categoryName'] == '택시팟빵') {
-                          final title =
-                              "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
-                          final subtitle = bread['detail'] ?? '세부 정보 없음';
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text("완료되기까지"),
+                  Text("시간이 얼마남지 않았으니 서두르세요!"),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  if (geoProvider.errorMessage != null)
+                    Text(
+                      geoProvider.errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  if (breads.isNotEmpty)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: breads.length,
+                        itemBuilder: (context, index) {
+                          final bread = breads[index];
+                          if (bread['categoryName'] == '택시팟빵') {
+                            final title =
+                                "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
+                            final subtitle = bread['detail'] ?? '세부 정보 없음';
 
-                          return ListTile(
-                            title: Text(title),
-                            subtitle: Text(subtitle),
-                            trailing: Icon(Icons.arrow_forward),
-                            onTap: () => {showBreadDetails(bread)},
+                            return InkWell(
+                              onTap: () => showBreadDetails(bread),
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white, // 배경색 설정
+                                    borderRadius:
+                                        BorderRadius.circular(10), // 둥근 모서리 설정
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(0.1), // 그림자 색
+                                        spreadRadius: 2, // 그림자의 확장 범위
+                                        blurRadius: 5, // 그림자의 흐림 정도
+                                        offset:
+                                            Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                                      ),
+                                    ],
+                                  ),
+                                  child: ListTile(
+                                    title: Text(
+                                      title,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF574142),
+                                      ),
+                                    ),
+                                    subtitle: Text(subtitle),
+                                    trailing: Icon(Icons.arrow_forward),
+                                    onTap: () => {showBreadDetails(bread)},
+                                  )),
+                            );
+                          }
+                          return InkWell(
+                            onTap: () => showBreadDetails(bread),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white, // 배경색 설정
+                                  borderRadius:
+                                      BorderRadius.circular(10), // 둥근 모서리 설정
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black
+                                          .withOpacity(0.1), // 그림자 색
+                                      spreadRadius: 2, // 그림자의 확장 범위
+                                      blurRadius: 5, // 그림자의 흐림 정도
+                                      offset: Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                                    ),
+                                  ],
+                                ),
+                                child: ListTile(
+                                  title: Text(
+                                    bread['name'] ?? '이름 없음',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF574142),
+                                    ),
+                                  ),
+                                  subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
+                                  // trailing: Icon(Icons.arrow_forward),
+                                  onTap: () => {showBreadDetails(bread)},
+                                )),
                           );
-                        }
-                        return ListTile(
-                          title: Text(bread['name'] ?? '이름 없음'),
-                          subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
-                          trailing: Icon(Icons.arrow_forward),
-                          onTap: () => {showBreadDetails(bread)},
-                        );
-                      },
+                        },
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: Center(
+                        child: Text("팟빵이 없어요 ㅠㅠ"),
+                      ),
                     ),
-                  )
-                else
-                  Expanded(
-                    child: Center(
-                      child: Text("팟빵이 없어요 ㅠㅠ"),
+                  Center(
+                    child: Text(
+                      "어떤 팟빵에 들어가고 싶으신가요?",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF574142),
+                      ),
                     ),
                   ),
-                Text("어떤 팟빵에 드갈래"),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/result',
-                          arguments: 0,
-                        );
-                      },
-                      child: const Text('배달팟빵'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/result',
-                          arguments: 1,
-                        );
-                      },
-                      child: const Text('택시팟빵'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/result',
-                          arguments: 2,
-                        );
-                      },
-                      child: const Text('공구팟빵'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/result',
-                          arguments: 3,
-                        );
-                      },
-                      child: const Text('기타팟빵'),
-                    ),
-                  ],
-                )
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white, // 버튼 배경색
+                          shape: BoxShape.circle, // 원형으로 만들기
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2), // 그림자 색
+                              spreadRadius: 2, // 그림자의 확장 범위
+                              blurRadius: 5, // 그림자의 흐림 정도
+                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+                            ),
+                          ],
+                        ),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/result',
+                              arguments: 0,
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            shape: CircleBorder(),
+                            padding: EdgeInsets.all(20),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            '배달팟빵',
+                            style: TextStyle(),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white, // 버튼 배경색
+                          shape: BoxShape.circle, // 원형으로 만들기
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2), // 그림자 색
+                              spreadRadius: 2, // 그림자의 확장 범위
+                              blurRadius: 5, // 그림자의 흐림 정도
+                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+                            ),
+                          ],
+                        ),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/result',
+                              arguments: 1,
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            shape: CircleBorder(),
+                            padding: EdgeInsets.all(20),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            '택시팟빵',
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white, // 버튼 배경색
+                          shape: BoxShape.circle, // 원형으로 만들기
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2), // 그림자 색
+                              spreadRadius: 2, // 그림자의 확장 범위
+                              blurRadius: 5, // 그림자의 흐림 정도
+                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+                            ),
+                          ],
+                        ),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/result',
+                              arguments: 2,
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            shape: CircleBorder(),
+                            padding: EdgeInsets.all(20),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('공구팟빵'),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white, // 버튼 배경색
+                          shape: BoxShape.circle, // 원형으로 만들기
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2), // 그림자 색
+                              spreadRadius: 2, // 그림자의 확장 범위
+                              blurRadius: 5, // 그림자의 흐림 정도
+                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+                            ),
+                          ],
+                        ),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/result',
+                              arguments: 3,
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            shape: CircleBorder(),
+                            padding: EdgeInsets.all(20),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('기타팟빵'),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             );
           }
           return const Center(child: Text("데이터를 가져올 수 없습니다."));
