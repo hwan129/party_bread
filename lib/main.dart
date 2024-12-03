@@ -14,6 +14,7 @@ import 'signup_page.dart';
 import 'chat_page.dart';
 import 'provider.dart';
 import 'maps/getlocation.dart';
+import 'sign_in_email.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,6 +72,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfilePage(), // 프로필 페이지
         '/add': (context) => AddPage(),
         '/signup': (context) => SignupPage(),
+        '/sign_in_email': (context) => SignInEmailPage(),
         '/locationPermission': (context) =>
             LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
