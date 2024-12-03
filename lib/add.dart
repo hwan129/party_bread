@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'provider.dart';
+
 
 class AddPage extends StatefulWidget {
   @override
@@ -303,10 +305,12 @@ class _AddPageState extends State<AddPage> {
   }
 
   // 파이어베이스에 데이터 저장
+  // 파이어베이스에 데이터 저장 및 유저 interactedDocs 업데이트
   Future<void> _submitData(Map<String, String> inputData) async {
     final geoProvider = Provider.of<GeoProvider>(context, listen: false);
     try {
-      await FirebaseFirestore.instance.collection('bread').add({
+      // Firestore에 팟빵 데이터 추가
+      DocumentReference docRef = await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
         'createdAt': Timestamp.now(),
@@ -315,6 +319,19 @@ class _AddPageState extends State<AddPage> {
         'selected_lat': geoProvider.selectedLatitude,
         'selected_lon': geoProvider.selectedLongitude,
       });
+
+      // 현재 유저 가져오기
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // 유저의 interactedDocs 필드 업데이트
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(user.uid)
+            .update({
+              'interactedDocs': FieldValue.arrayUnion([docRef.id]), // 문서 ID 추가
+            });
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("팟빵을 성공적으로 구웠어요!")),
       );
@@ -325,6 +342,7 @@ class _AddPageState extends State<AddPage> {
       );
     }
   }
+
 
   // 입력 필드 초기화
   void _clearFields() {
