@@ -78,17 +78,17 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
         '/getlocation': (context) => GetLocation(), // 지도에서 위치 가져오는 페이지
       },
-        onGenerateRoute: (settings) {
-          if (settings.name == '/chatting') {
-            final args = settings.arguments as Map<String, dynamic>;
-            return MaterialPageRoute(
-              builder: (context) => ChatRoomPage(
-                roomId: args['roomId'], // 전달받은 roomId를 사용
-              ),
-            );
-          }
-          return null; // 정의되지 않은 경로 처리
-        },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/chatting') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => ChatRoomPage(
+              roomId: args['roomId'], // 전달받은 roomId를 사용
+            ),
+          );
+        }
+        return null; // 정의되지 않은 경로 처리
+      },
     );
   }
 }

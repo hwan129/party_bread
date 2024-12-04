@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'provider.dart';
 
-
 class AddPage extends StatefulWidget {
   @override
   _AddPageState createState() => _AddPageState();
@@ -310,7 +309,8 @@ class _AddPageState extends State<AddPage> {
     final geoProvider = Provider.of<GeoProvider>(context, listen: false);
     try {
       // Firestore에 팟빵 데이터 추가
-      DocumentReference docRef = await FirebaseFirestore.instance.collection('bread').add({
+      DocumentReference docRef =
+          await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
         'createdAt': Timestamp.now(),
@@ -328,8 +328,8 @@ class _AddPageState extends State<AddPage> {
             .collection('user')
             .doc(user.uid)
             .update({
-              'interactedDocs': FieldValue.arrayUnion([docRef.id]), // 문서 ID 추가
-            });
+          'interactedDocs': FieldValue.arrayUnion([docRef.id]), // 문서 ID 추가
+        });
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -342,7 +342,6 @@ class _AddPageState extends State<AddPage> {
       );
     }
   }
-
 
   // 입력 필드 초기화
   void _clearFields() {
