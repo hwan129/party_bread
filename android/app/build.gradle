@@ -10,6 +10,7 @@ plugins {
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.5.1')
 
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.0-beta5'
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
     implementation 'com.google.firebase:firebase-analytics'
 }
