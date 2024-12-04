@@ -1,105 +1,191 @@
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-// import 'package:image_picker/image_picker.dart';
-//
-// class ReceiptPage extends StatefulWidget {
-//   @override
-//   _ReceiptPageState createState() => _ReceiptPageState();
-// }
-//
-// class _ReceiptPageState extends State<ReceiptPage> {
-//   String parsedtext = '';
-//   String imagePath = '';
-//
-//   Future<void> _getFromGallery() async {
-//     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-//     if (imagePath.isNotEmpty) {
-//
-//       setState(() {
-//         imagePath = pickedFile.path;
-//       });
-//
-//       await _processImage(pickedFile.path);
-//     }
-//   }
-//   }
-//
-//   Future<void> _processImage(String imagePath) async {
-//     final inputImage = InputImage.fromFilePath(imagePath);
-//     final textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
-//
-//     // try {
-//     final recognizedText = await textRecognizer.processImage(inputImage);
-//
-//     setState(() {
-//       parsedtext = recognizedText.text;
-//     });
-//
-//     _showResultModal(parsedtext ?? "텍스트를 인식하지 못했습니다.");
-//     // }
-//     // finally {
-//     //   textRecognizer.close(); // 리소스 해제
-//     // }
-//   }
-//
-//   void _showResultModal(String result) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('영수증 분석 결과'),
-//           content: SingleChildScrollView(
-//             child: Text(result),
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () {
-//                 Navigator.of(context).pop();
-//               },
-//               child: Text('닫기'),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('영수증 분석'),
-//       ),
-//       body: Center(
-//         child: Column(
-//           children: [
-//             if (imagePath != null)
-//               Padding(
-//                 padding: const EdgeInsets.all(20.0),
-//                 child: Image.file(
-//                   File(imagePath!),
-//                   height: 500,
-//                   fit: BoxFit.cover,
-//                 ),
-//               ),
-//             SizedBox(height: 20),
-//             ElevatedButton(
-//               onPressed: _getFromGallery,
-//               child: Text('영수증 사진 찾기'),
-//             ),
-//             SizedBox(height: 20),
-//             if (parsedtext != null)
-//               Padding(
-//                 padding: const EdgeInsets.all(20.0),
-//                 child: Text(
-//                   '분석된 텍스트:\n$parsedtext',
-//                   textAlign: TextAlign.center,
-//                 ),
-//               ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'dart:io';
+import 'package:intl/intl.dart';
+
+class Receipt extends StatefulWidget {
+  @override
+  _ReceiptState createState() => _ReceiptState();
+}
+
+class _ReceiptState extends State<Receipt> {
+  File? _image;
+  String? _totalAmount;
+  String text = "";
+  final _peopleController = TextEditingController();
+  final picker = ImagePicker();
+
+  // 갤러리 뒤지기
+  Future<void> _gallery() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      _processImage(File(pickedFile.path));
+    }
+  }
+
+  // 사진 찰칵
+  Future<void> _takePhoto() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      _processImage(File(pickedFile.path));
+    }
+  }
+
+  // 이미지 분석
+  Future<void> _processImage(File image) async {
+    final inputImage = InputImage.fromFile(image);
+    final textRecognizer = GoogleMlKit.vision.textRecognizer();
+    final recognizedText = await textRecognizer.processImage(inputImage);
+
+    List<String> extractedAmounts = []; // 추출한 텍스트 저장소
+    RegExp regExp = RegExp(r'(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)');
+
+    for (var block in recognizedText.blocks) {
+      for (var line in block.lines) {
+        if (regExp.hasMatch(line.text)) {
+          extractedAmounts.add(regExp.firstMatch(line.text)?.group(0) ?? '');
+        }
+      }
+    }
+
+    // 천원 이상의 금액을 찾은 경우에만 저장
+    String? validAmount;
+    for (var amount in extractedAmounts) {
+      final totalAmount = double.tryParse(amount.replaceAll(',', '').replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
+
+      if (totalAmount >= 1000) {
+        validAmount = amount;
+        break;
+      }
+    }
+
+    setState(() {
+      if (validAmount != null) {
+        _totalAmount = validAmount;
+      } else {
+        _totalAmount = null;
+      }
+      text = recognizedText.text;
+    });
+
+    textRecognizer.close();
+  }
+
+  @override
+  void dispose() {
+    _peopleController.dispose();
+    super.dispose();
+  }
+
+  // 그림판
+  Widget _buildImageCanvas() {
+    return _image == null
+        ? const Center(child: Text("이미지를 선택하세요."))
+        : GestureDetector(
+      onPanUpdate: (details) {
+        // 그림판 기능 구현 필요 시 추가
+      },
+      child: Image.file(_image!),
+    );
+  }
+
+  // 정산 인원 설정하는 버튼 기능
+  int peopleCount = 1;
+
+  void _increasePeople() { // 플러스 버튼
+    setState(() {
+      peopleCount++;
+    });
+  }
+
+  void _decreasePeople() { // 마이너스
+    if (peopleCount > 1) {
+      setState(() {
+        peopleCount--;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('정산하기')),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(child: _buildImageCanvas()),
+            // 영수증 사진 고르기 or 사진 찍기
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(onPressed: _gallery, icon: Icon(Icons.attach_file)),
+                IconButton(onPressed: _takePhoto, icon: Icon(Icons.add_a_photo)),
+              ],
+            ),
+            if (_totalAmount != null)
+              Text('총 금액: $_totalAmount 원', style: TextStyle(fontSize: 24)),
+            Text('정산할 인원', style: TextStyle(fontSize: 24)),
+            // 정산할 인원수 선택
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: _decreasePeople,
+                  icon: Icon(Icons.remove),
+                ),
+                Text('$peopleCount 명', style: TextStyle(fontSize: 20)),
+                IconButton(
+                  onPressed: _increasePeople,
+                  icon: Icon(Icons.add),
+                ),
+              ],
+            ),
+            // 정산하기 버튼 -> 인당 얼마씩인지 + 영수증에 그림 그리기
+            ElevatedButton(
+              onPressed: () {
+                if (_totalAmount != null && _peopleController.text.isNotEmpty) {
+                  final total = double.tryParse(
+                      _totalAmount!.replaceAll(RegExp(r'[^\d.]'), '')) ??
+                      0;
+                  final perPerson = (total / peopleCount);
+
+                  // 정산한 금액 천 단위로 콤마 찍어주기
+                  final formatter = NumberFormat('#,###');
+                  final formattedAmount = formatter.format(perPerson);
+
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text('정산 결과'),
+                      content: Text(
+                        '1인당 $formattedAmount 원',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: Text('확인'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+              child: Text('정산하기'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
