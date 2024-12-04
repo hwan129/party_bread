@@ -67,7 +67,22 @@ class _AddPageState extends State<AddPage> {
                 Center(
                   child: ElevatedButton(
                     onPressed: _showConfirmationModal,
-                    child: const Text('팟빵 굽기'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF574142), // 배경색을 갈색으로 설정
+                      foregroundColor: Colors.white, // 글자 색을 흰색으로 설정
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 110,
+                          vertical: 16), // 버튼의 크기를 키우기 위한 패딩 설정
+                      textStyle: TextStyle(fontSize: 18), // 글자 크기 설정
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0), // 원하는 반경 설정
+                      ),
+                    ),
+                    child: const Text(
+                      '팟빵 굽기',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 )
             ],
@@ -112,9 +127,12 @@ class _AddPageState extends State<AddPage> {
   List<Widget> _buildDeliveryFields(double latitude, double longitude) {
     return [
       Text("무엇을 먹을 건가요?", style: _fieldTitleStyle),
-      Text("상호명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("장충동왕족발보쌈", nameController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      Text("상호명은 풀네임으로 적는 게 좋아요.", style: _subTitleStyle),
+      _buildTextField("상호명을 입력해주세요.", nameController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("주문 시간", style: _fieldTitleStyle),
       _buildTimeField("주문 시간을 선택하세요", orderTimeController),
       Text("픽업 시간", style: _fieldTitleStyle),
@@ -123,7 +141,7 @@ class _AddPageState extends State<AddPage> {
       Row(
         children: [
           Expanded(
-            child: _buildTextField("하용조관 1층", pickMeUpController),
+            child: _buildTextField("정확한 장소를 입력해주세요.", pickMeUpController),
           ),
           IconButton(
             icon: const Icon(Icons.map),
@@ -134,9 +152,9 @@ class _AddPageState extends State<AddPage> {
         ],
       ),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -144,16 +162,19 @@ class _AddPageState extends State<AddPage> {
   List<Widget> _buildTaxiFields(double latitude, double longitude) {
     return [
       Text("어디로 갈 건가요?", style: _fieldTitleStyle),
-      Text("장소는 상세하게 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("목적지를 입력하세요", destinationController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      Text("장소는 상세하게 적는 게 좋아요.", style: _subTitleStyle),
+      _buildTextField("목적지를 입력하세요.", destinationController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("탑승 시간", style: _fieldTitleStyle),
-      _buildTimeField("탑승 시간을 선택하세요", timeController),
+      _buildTimeField("탑승 시간을 선택하세요.", timeController),
       Text("탑승 장소", style: _fieldTitleStyle),
       Row(
         children: [
           Expanded(
-            child: _buildTextField("탑승 장소를 입력하세요", pickMeUpController),
+            child: _buildTextField("추가적인 탑승 장소를 입력하세요.", pickMeUpController),
           ),
           IconButton(
             icon: const Icon(Icons.map),
@@ -164,9 +185,9 @@ class _AddPageState extends State<AddPage> {
         ],
       ),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -175,14 +196,17 @@ class _AddPageState extends State<AddPage> {
     return [
       Text("어떤 물건인가요?", style: _fieldTitleStyle),
       Text("제품명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("보들보들 치즈볶음면", nameController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      _buildTextField("구매할 제품명을 입력해주세요.", nameController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTimeField("마감일을 선택하세요", timeController),
+      _buildTimeField("마감일을 선택하세요.", timeController),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -190,15 +214,18 @@ class _AddPageState extends State<AddPage> {
   List<Widget> _buildOtherFields(double latitude, double longitude) {
     return [
       Text("무엇을 할 건가요?", style: _fieldTitleStyle),
-      _buildTextField("롤 5대5 할 사람", nameController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      _buildTextField("팟빵의 주제를 입력해주세요.", nameController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTimeField("마감일을 선택하세요", timeController),
+      _buildTimeField("마감일을 선택하세요.", timeController),
       Text("장소", style: _fieldTitleStyle),
       Row(
         children: [
           Expanded(
-            child: _buildTextField("탑승 장소를 입력하세요", pickMeUpController),
+            child: _buildTextField("장소를 입력하세요.", pickMeUpController),
           ),
           IconButton(
             icon: const Icon(Icons.map),
@@ -209,9 +236,9 @@ class _AddPageState extends State<AddPage> {
         ],
       ),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -223,7 +250,15 @@ class _AddPageState extends State<AddPage> {
         controller: controller,
         decoration: InputDecoration(
           hintText: hint,
-          border: OutlineInputBorder(),
+          hintStyle: TextStyle(color: Colors.grey[400]),
+          enabledBorder: UnderlineInputBorder(
+            // 기본 상태의 밑줄
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            // 포커스 상태의 밑줄
+            borderSide: BorderSide(color: Color(0xFF574142)),
+          ),
         ),
       ),
     );
@@ -240,8 +275,10 @@ class _AddPageState extends State<AddPage> {
               controller: controller,
               decoration: InputDecoration(
                 hintText: hint,
+                hintStyle: TextStyle(color: Colors.grey[400]),
                 border: OutlineInputBorder(),
               ),
+
               readOnly: true, // 입력 불가, Time Picker만 사용
             ),
           ),
@@ -401,5 +438,5 @@ class _AddPageState extends State<AddPage> {
 
   // 스타일
   final _fieldTitleStyle = TextStyle(fontSize: 26, fontWeight: FontWeight.bold);
-  final _subTitleStyle = TextStyle(fontSize: 26, color: Colors.grey);
+  final _subTitleStyle = TextStyle(fontSize: 16, color: Colors.grey);
 }
