@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';  // FirebaseAuth 추가
 import '../provider.dart';
 
 class ResultPage extends StatefulWidget {
@@ -105,29 +106,32 @@ class _ResultPageState extends State<ResultPage> {
 
               if (distance <= 1000) {
                 if (categoryName == '택시팟빵') {
-                  return {
-                    'category': data['category'],
-                    'pickMeUp': data['data']['픽업 위치'],
-                    'destination': data['data']['목적지'],
-                    'time': data['data']['탑승 시간'],
-                    'peopleCount': data['data']['인원 수'],
-                    'detail': data['data']['추가 사항'],
-                  };
-                }
+            return {
+              'docId': doc.id, // 문서 ID 추가
+              'category': data['category'],
+              'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
+              'destination': data['data']['목적지'], // 수정된 변수명
+              'time': data['data']['탑승 시간'], // 수정된 변수명
+              'peopleCount': data['data']['인원 수'], // 수정된 변수명
+              'detail': data['data']['추가 사항'], // 수정된 변수명
+            };
+          }
 
-                return {
-                  'category': data['category'],
-                  'name': data['data']['음식 이름'], // 수정된 변수명
-                  'orderTime': data['data']['주문 시간'], // 수정된 변수명
-                  'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
-                  'peopleCount': data['data']['인원 수'], // 수정된 변수명
-                  'detail': data['data']['추가 사항'], // 수정된 변수명
-                };
+          return {
+            'docId': doc.id, // 문서 ID 추가
+            'category': data['category'],
+            'name': data['data']['음식 이름'], // 수정된 변수명
+            'orderTime': data['data']['주문 시간'], // 수정된 변수명
+            'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+            'peopleCount': data['data']['인원 수'], // 수정된 변수명
+            'detail': data['data']['추가 사항'], // 수정된 변수명
+          };
               }
             })
             .where((bread) => bread != null) // null 제거
             .cast<Map<String, dynamic>>() // 명시적 캐스팅
             .toList();
+
 
         isLoading = false;
       });
@@ -189,12 +193,38 @@ class _ResultPageState extends State<ResultPage> {
                 Spacer(),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/chatting',
-                        arguments: {'roomId': bread['category']},
-                      );
+                    onPressed: () async {
+                      try {
+                        final user = FirebaseAuth.instance.currentUser;
+
+                        if (user != null) {
+                          // Firestore에서 user 컬렉션에 접근
+                          final userDoc = FirebaseFirestore.instance.collection('user').doc(user.uid);
+
+                          // 유저의 interactedDocs 배열에 해당 문서 ID가 존재하는지 확인
+                          final userSnapshot = await userDoc.get();
+                          final interactedDocs = List<String>.from(userSnapshot.data()?['interactedDocs'] ?? []);
+
+                          // 문서 ID가 없으면 추가
+                          if (!interactedDocs.contains(bread['docId'])) {
+                            await userDoc.update({
+                              'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                            });
+                          }
+
+                          // 채팅 화면으로 이동
+                          Navigator.pushNamed(
+                            context,
+                            '/chatting',
+                            arguments: {'roomId': bread['category']},
+                          );
+                        }
+                      } catch (e) {
+                        print('문서 업데이트 중 오류 발생: $e');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('오류가 발생했습니다. 다시 시도해주세요.')),
+                        );
+                      }
                     },
                     child: Text('팟빵 함께 먹기'),
                   ),
