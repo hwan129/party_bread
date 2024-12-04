@@ -9,6 +9,10 @@ import 'profile.dart';
 import 'result.dart';
 import 'add.dart';
 import 'signup_page.dart';
+import 'please.dart';
+import 'receipt.dart';
+import 'receipt_brain/photo_page.dart';
+import 'receipt_brain/text_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,17 +52,22 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.brown,
           )),
 
-      initialRoute: '/home', // 시작 페이지 설정
+      // initialRoute: '/photo', // 시작 페이지 설정
+      initialRoute: '/please', // 시작 페이지 설정
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
         '/login': (context) => LoginPage(), // 로그인 페이지
         '/result': (context) => ResultPage(), // 카테고리, 검색 결과 페이지
         '/profile': (context) => ProfilePage(), // 프로필 페이지
         '/add': (context) => AddPage(),
+        // '/receipt': (context) => ReceiptPage(),
+        '/photo' : (context) => PhotoPage(),
+        '/text' : (context) => TextPage(),
         '/signup': (context) => SignupPage(),
         '/locationPermission': (context) =>
             LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
+        '/please': (context) => Receipt(),
       },
     );
   }
