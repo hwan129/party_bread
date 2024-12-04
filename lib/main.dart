@@ -3,6 +3,8 @@ import 'login_page.dart';
 import 'location_permission_page.dart';
 import 'onboarding_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'home.dart';
 import 'profile.dart';
@@ -10,13 +12,27 @@ import 'result.dart';
 import 'add.dart';
 import 'signup_page.dart';
 import 'receipt.dart';
+import 'chat_page.dart';
+import 'provider.dart';
+import 'maps/getlocation.dart';
+import 'sign_in_email.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.playIntegrity,
+  );
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => GeoProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -59,9 +75,22 @@ class MyApp extends StatelessWidget {
         '/add': (context) => AddPage(),
         '/receipt': (context) => Receipt(),
         '/signup': (context) => SignupPage(),
+        '/sign_in_email': (context) => SignInEmailPage(),
         '/locationPermission': (context) =>
             LocationPermissionPage(), // 위치 정보 확인 페이지
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
+        '/getlocation': (context) => GetLocation(), // 지도에서 위치 가져오는 페이지
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/chatting') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => ChatRoomPage(
+              roomId: args['roomId'], // 전달받은 roomId를 사용
+            ),
+          );
+        }
+        return null; // 정의되지 않은 경로 처리
       },
     );
   }

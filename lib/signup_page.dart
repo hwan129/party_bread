@@ -11,7 +11,6 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _nicknameController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -28,11 +27,13 @@ class _SignupPageState extends State<SignupPage> {
       User? user = userCredential.user;
       if (user != null) {
         await _firestore.collection('user').doc(user.uid).set({
-          'email': _emailController.text.trim(),
-          'name': _nameController.text.trim(),
-          'nickname': _nicknameController.text.trim(),
-          'uid': user.uid,
-          'isNewUser': true,
+          'email': _emailController.text.trim(), // 이메일
+          'name': _nameController.text.trim(), // 이름
+          'uid': user.uid, // Firebase UID
+          'isNewUser': true, // 새로운 사용자 플래그
+          'interactedDocs': [], // 빈 배열로 초기화된 활동 내역
+          'profileImage':
+              "https://firebasestorage.googleapis.com/v0/b/party-bread.firebasestorage.app/o/potbbang.png?alt=media&token=d0f000c8-3dee-4cb0-8461-4d7bbf136c4b", // 기본 프로필 이미지
         });
       }
 
@@ -75,29 +76,59 @@ class _SignupPageState extends State<SignupPage> {
             children: [
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                  ),
+                ),
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                  ),
+                ),
                 obscureText: true,
               ),
               SizedBox(height: 16),
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _nicknameController,
-                decoration: InputDecoration(labelText: 'Nickname'),
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                  ),
+                ),
               ),
               SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _signUpUser,
                 child: Text('Complete Sign Up'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF574142), // 버튼 색상 설정
+                  foregroundColor: Colors.white, // 텍스트 색상
+                  minimumSize: Size(double.infinity, 50), // 버튼 크기 설정
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8), // 버튼 모서리 둥글게
+                  ),
+                ),
               ),
             ],
           ),
@@ -111,7 +142,6 @@ class _SignupPageState extends State<SignupPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
-    _nicknameController.dispose();
     super.dispose();
   }
 }
