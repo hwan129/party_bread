@@ -18,6 +18,7 @@ class _AddPageState extends State<AddPage> {
   final TextEditingController pickMeUpController = TextEditingController();
   final TextEditingController pickupTimeController = TextEditingController();
   final TextEditingController peopleCountController = TextEditingController();
+  final TextEditingController currentpeopleCountController = TextEditingController(text: "1");
   final TextEditingController destinationController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
 
@@ -322,6 +323,9 @@ class _AddPageState extends State<AddPage> {
         '픽업 시간': pickupTimeController.text,
         '픽업 위치': pickMeUpController.text,
         '인원 수': peopleCountController.text,
+        '현재 인원 수': currentpeopleCountController.text.isEmpty
+        ? "1"
+        : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "택시팟빵") {
@@ -330,6 +334,9 @@ class _AddPageState extends State<AddPage> {
         '탑승 시간': timeController.text,
         '탑승 장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
+        '현재 인원 수': currentpeopleCountController.text.isEmpty
+        ? "1"
+        : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "공구팟빵") {
@@ -337,6 +344,9 @@ class _AddPageState extends State<AddPage> {
         '제품명': nameController.text,
         '마감일': timeController.text,
         '인원 수': peopleCountController.text,
+        '현재 인원 수': currentpeopleCountController.text.isEmpty
+        ? "1"
+        : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "기타팟빵") {
@@ -345,6 +355,9 @@ class _AddPageState extends State<AddPage> {
         '마감일': timeController.text,
         '장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
+        '현재 인원 수': currentpeopleCountController.text.isEmpty
+        ? "1"
+        : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     }
@@ -401,13 +414,13 @@ class _AddPageState extends State<AddPage> {
   // 파이어베이스에 데이터 저장 및 유저 interactedDocs 업데이트
   Future<void> _submitData(Map<String, String> inputData) async {
     final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+
     try {
       // Firestore에 팟빵 데이터 추가
       DocumentReference docRef =
           await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
-        'peopleCount': peopleCountController.text,
         'createdAt': Timestamp.now(),
         'lat': geoProvider.latitude,
         'lon': geoProvider.longitude,
@@ -415,15 +428,13 @@ class _AddPageState extends State<AddPage> {
         'selected_lon': geoProvider.selectedLongitude,
       });
 
-      // 현재 유저 가져오기
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // 유저의 interactedDocs 필드 업데이트
         await FirebaseFirestore.instance
             .collection('user')
             .doc(user.uid)
             .update({
-          'interactedDocs': FieldValue.arrayUnion([docRef.id]), // 문서 ID 추가
+          'interactedDocs': FieldValue.arrayUnion([docRef.id]),
         });
       }
 
@@ -447,6 +458,7 @@ class _AddPageState extends State<AddPage> {
     pickupTimeController.clear();
     destinationController.clear();
     timeController.clear();
+    currentpeopleCountController.text = "1";
   }
 
   // 스타일

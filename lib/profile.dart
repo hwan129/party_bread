@@ -193,21 +193,39 @@ class _ProfilePageState extends State<ProfilePage> {
                           itemBuilder: (context, index) {
                             final activity = activityHistory[index];
                             final data = activity['data'];
-                            return ListTile(
-                              title: Text("Category: ${activity['category']}"),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("음식 이름: ${data['음식 이름']}"),
-                                  Text("주문 시간: ${data['주문 시간']}"),
-                                  Text("추가 사항: ${data['추가 사항']}"),
-                                  Text("픽업 시간: ${data['픽업 시간']}"),
-                                  Text("픽업 위치: ${data['픽업 위치']}"),
-                                ],
+                            final category = activity['category'];
+
+                            return Card(
+                              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                              elevation: 4.0,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Category: $category",
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(height: 8),
+                                    if (category == "택시팟빵") ...[
+                                      Text("목적지: ${data['음식 이름']}"),
+                                      Text("탑승 시간: ${data['주문 시간']}"),
+                                      Text("추가 사항: ${data['추가 사항']}"),
+                                      Text("탑승 장소: ${data['픽업 위치']}"),
+                                    ] else ...[
+                                      Text("음식 이름: ${data['음식 이름']}"),
+                                      Text("주문 시간: ${data['주문 시간']}"),
+                                      Text("추가 사항: ${data['추가 사항']}"),
+                                      Text("픽업 시간: ${data['픽업 시간']}"),
+                                      Text("픽업 위치: ${data['픽업 위치']}"),
+                                    ],
+                                  ],
+                                ),
                               ),
                             );
                           },
-                        ),
+                        )
                 ],
               ),
             ),
