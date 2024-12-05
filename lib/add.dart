@@ -98,6 +98,18 @@ class _AddPageState extends State<AddPage> {
     return Flexible(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white, // 버튼 배경색
+          shape: BoxShape.circle, // 원형으로 만들기
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3), // 그림자 색
+              spreadRadius: 2, // 그림자의 확장 범위
+              blurRadius: 7, // 그림자의 흐림 정도
+              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+            ),
+          ],
+        ),
         child: TextButton(
           onPressed: () {
             setState(() {

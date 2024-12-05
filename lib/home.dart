@@ -43,11 +43,17 @@ class _HomePageState extends State<HomePage> {
       ),
       child: TextButton(
         onPressed: () {
-          Navigator.pushNamed(
-            context,
-            '/result',
-            arguments: 0,
-          );
+          int argument = 0; // 기본 값 설정
+          if (category == "배달팟빵") {
+            argument = 0;
+          } else if (category == "택시팟빵") {
+            argument = 1;
+          } else if (category == "공구팟빵") {
+            argument = 2;
+          } else if (category == "기타팟빵") {
+            argument = 3;
+          }
+          Navigator.pushNamed(context, '/result', arguments: argument);
         },
         style: TextButton.styleFrom(
           shape: CircleBorder(),
