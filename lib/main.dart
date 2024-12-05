@@ -11,6 +11,7 @@ import 'profile.dart';
 import 'result.dart';
 import 'add.dart';
 import 'signup_page.dart';
+import 'receipt.dart';
 import 'chat_page.dart';
 import 'provider.dart';
 import 'maps/getlocation.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.brown,
           )),
 
+      // initialRoute: '/receipt', // 시작 페이지 설정
       initialRoute: '/login', // 시작 페이지 설정
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
@@ -71,6 +73,7 @@ class MyApp extends StatelessWidget {
         '/result': (context) => ResultPage(), // 카테고리, 검색 결과 페이지
         '/profile': (context) => ProfilePage(), // 프로필 페이지
         '/add': (context) => AddPage(),
+        '/receipt': (context) => Receipt(),
         '/signup': (context) => SignupPage(),
         '/sign_in_email': (context) => SignInEmailPage(),
         '/locationPermission': (context) =>
@@ -78,17 +81,17 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => OnboardingPage(), // 온보딩 페이지
         '/getlocation': (context) => GetLocation(), // 지도에서 위치 가져오는 페이지
       },
-        onGenerateRoute: (settings) {
-          if (settings.name == '/chatting') {
-            final args = settings.arguments as Map<String, dynamic>;
-            return MaterialPageRoute(
-              builder: (context) => ChatRoomPage(
-                roomId: args['roomId'], // 전달받은 roomId를 사용
-              ),
-            );
-          }
-          return null; // 정의되지 않은 경로 처리
-        },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/chatting') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => ChatRoomPage(
+              roomId: args['roomId'], // 전달받은 roomId를 사용
+            ),
+          );
+        }
+        return null; // 정의되지 않은 경로 처리
+      },
     );
   }
 }

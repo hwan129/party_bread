@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'provider.dart';
 
-
 class AddPage extends StatefulWidget {
   @override
   _AddPageState createState() => _AddPageState();
@@ -65,12 +64,27 @@ class _AddPageState extends State<AddPage> {
                 ..._buildOtherFields(
                     geoProvider.latitude!, geoProvider.longitude!),
               const SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _showConfirmationModal,
-                  child: const Text('팟빵 굽기'),
-                ),
-              ),
+              if (selectedCategory != "")
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _showConfirmationModal,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF574142),
+                      foregroundColor: Colors.white,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 110, vertical: 16),
+                      textStyle: TextStyle(fontSize: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    child: const Text(
+                      '팟빵 굽기',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                )
             ],
           ),
         ),
@@ -81,20 +95,43 @@ class _AddPageState extends State<AddPage> {
   // 카테고리 버튼
   Widget _buildCategoryButton(String category) {
     bool isSelected = selectedCategory == category;
-
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          selectedCategory = category;
-        });
-        _clearFields(); // 다른 카테고리 선택 시 입력한 거 다 사라짐
-      },
-      style: TextButton.styleFrom(
-        backgroundColor:
-            isSelected ? Colors.brown : Colors.white, // 선택된 버튼은 갈색, 나머지는 흰색
-        foregroundColor: isSelected ? Colors.white : Colors.black, // 텍스트 색상 설정
+    return Flexible(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white, // 버튼 배경색
+          shape: BoxShape.circle, // 원형으로 만들기
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3), // 색
+              spreadRadius: 2, // 확장 범위
+              blurRadius: 7, // 흐림 정도
+              offset: Offset(0, 4), // 그림자 위치
+            ),
+          ],
+        ),
+        child: TextButton(
+          onPressed: () {
+            setState(() {
+              selectedCategory = category;
+            });
+            _clearFields(); // 다른 카테고리 선택 시 입력한 거 다 사라짐
+          },
+          style: TextButton.styleFrom(
+            shape: CircleBorder(),
+            padding: EdgeInsets.all(27),
+            backgroundColor: isSelected
+                ? Color(0xFF574142) // 선택된 버튼 갈색
+                : Color(0xFFE5D6D6), // 나머지 흰색
+            foregroundColor:
+                isSelected ? Colors.white : Color(0xFF574142), // 텍스트 색상
+          ),
+          child: Text(
+            category,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
       ),
-      child: Text(category),
     );
   }
 
@@ -102,25 +139,34 @@ class _AddPageState extends State<AddPage> {
   List<Widget> _buildDeliveryFields(double latitude, double longitude) {
     return [
       Text("무엇을 먹을 건가요?", style: _fieldTitleStyle),
-      Text("상호명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("장충동왕족발보쌈", nameController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
-      Text("주문 시간", style: _fieldTitleStyle),
-      _buildTimeField("주문 시간을 선택하세요", orderTimeController),
-      Text("픽업 시간", style: _fieldTitleStyle),
-      IconButton(
-        icon: const Icon(Icons.map),
-        onPressed: () {
-          Navigator.pushNamed(context, '/getlocation');
-        },
+      Text("상호명은 풀네임으로 적는 게 좋아요.", style: _subTitleStyle),
+      _buildTextField("상호명을 입력해주세요.", nameController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
       ),
-      _buildTimeField("픽업 시간을 선택하세요", pickupTimeController),
+      Text("주문 시간", style: _fieldTitleStyle),
+      _buildTimeField("주문 시간을 선택하세요.", orderTimeController),
+      Text("픽업 시간", style: _fieldTitleStyle),
+      _buildTimeField("픽업 시간을 선택하세요.", pickupTimeController),
       Text("픽업 장소", style: _fieldTitleStyle),
-      _buildTextField("하용조관 1층", pickMeUpController),
+      Row(
+        children: [
+          Expanded(
+            child: _buildTextField("더 자세히 장소를 입력해주세요.", pickMeUpController),
+          ),
+          IconButton(
+            icon: const Icon(Icons.map),
+            onPressed: () {
+              Navigator.pushNamed(context, '/getlocation');
+            },
+          ),
+        ],
+      ),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -128,17 +174,32 @@ class _AddPageState extends State<AddPage> {
   List<Widget> _buildTaxiFields(double latitude, double longitude) {
     return [
       Text("어디로 갈 건가요?", style: _fieldTitleStyle),
-      Text("장소는 상세하게 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("목적지를 입력하세요", destinationController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      Text("장소는 상세하게 적는 게 좋아요.", style: _subTitleStyle),
+      _buildTextField("목적지를 입력하세요.", destinationController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("탑승 시간", style: _fieldTitleStyle),
-      _buildTimeField("탑승 시간을 선택하세요", timeController),
+      _buildTimeField("탑승 시간을 선택하세요.", timeController),
       Text("탑승 장소", style: _fieldTitleStyle),
-      _buildTextField("탑승 장소를 입력하세요", pickMeUpController),
+      Row(
+        children: [
+          Expanded(
+            child: _buildTextField("더 자세히 탑승 장소를 입력하세요.", pickMeUpController),
+          ),
+          IconButton(
+            icon: const Icon(Icons.map),
+            onPressed: () {
+              Navigator.pushNamed(context, '/getlocation');
+            },
+          ),
+        ],
+      ),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -147,14 +208,17 @@ class _AddPageState extends State<AddPage> {
     return [
       Text("어떤 물건인가요?", style: _fieldTitleStyle),
       Text("제품명은 풀네임으로 적는 게 좋아요", style: _subTitleStyle),
-      _buildTextField("보들보들 치즈볶음면", nameController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      _buildTextField("구매할 제품명을 입력해주세요.", nameController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTimeField("마감일을 선택하세요", timeController),
+      _buildTimeField("마감일을 선택하세요.", timeController),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -162,14 +226,31 @@ class _AddPageState extends State<AddPage> {
   List<Widget> _buildOtherFields(double latitude, double longitude) {
     return [
       Text("무엇을 할 건가요?", style: _fieldTitleStyle),
-      _buildTextField("롤 5대5 할 사람", nameController),
-      Text("더 자세하게 알려주세요", style: _fieldTitleStyle),
+      _buildTextField("팟빵의 주제를 입력해주세요.", nameController),
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
+      ),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTimeField("마감일을 선택하세요", timeController),
+      _buildTimeField("마감일을 선택하세요.", timeController),
+      Text("장소", style: _fieldTitleStyle),
+      Row(
+        children: [
+          Expanded(
+            child: _buildTextField("더 자세히 장소를 입력하세요.", pickMeUpController),
+          ),
+          IconButton(
+            icon: const Icon(Icons.map),
+            onPressed: () {
+              Navigator.pushNamed(context, '/getlocation');
+            },
+          ),
+        ],
+      ),
       Text("인원", style: _fieldTitleStyle),
-      _buildTextField("인원수를 입력하세요", peopleCountController),
+      _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
-      _buildTextField("추가 사항을 입력하세요", detailController),
+      _buildTextField("추가 사항을 입력하세요.", detailController),
     ];
   }
 
@@ -181,7 +262,15 @@ class _AddPageState extends State<AddPage> {
         controller: controller,
         decoration: InputDecoration(
           hintText: hint,
-          border: OutlineInputBorder(),
+          hintStyle: TextStyle(color: Colors.grey),
+          enabledBorder: UnderlineInputBorder(
+            // 기본 상태의 밑줄
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            // 포커스 상태의 밑줄
+            borderSide: BorderSide(color: Color(0xFF574142)),
+          ),
         ),
       ),
     );
@@ -198,8 +287,10 @@ class _AddPageState extends State<AddPage> {
               controller: controller,
               decoration: InputDecoration(
                 hintText: hint,
+                hintStyle: TextStyle(color: Colors.grey),
                 border: OutlineInputBorder(),
               ),
+
               readOnly: true, // 입력 불가, Time Picker만 사용
             ),
           ),
@@ -262,6 +353,7 @@ class _AddPageState extends State<AddPage> {
       inputData = {
         '이름': nameController.text,
         '마감일': timeController.text,
+        '장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
         ? "1"
@@ -309,7 +401,7 @@ class _AddPageState extends State<AddPage> {
             onPressed: () {
               _submitData(inputData); // Firebase에 데이터 전송
               Navigator.of(ctx).pop(); // Modal을 닫고 detail 화면으로 이동
-              Navigator.pushNamed(context, '/detail'); // 페이지 네비게이션
+              Navigator.pop(ctx); // 페이지 네비게이션
             },
             child: Text("확인"),
           ),
@@ -357,7 +449,6 @@ class _AddPageState extends State<AddPage> {
     }
   }
 
-
   // 입력 필드 초기화
   void _clearFields() {
     nameController.clear();
@@ -372,5 +463,5 @@ class _AddPageState extends State<AddPage> {
 
   // 스타일
   final _fieldTitleStyle = TextStyle(fontSize: 26, fontWeight: FontWeight.bold);
-  final _subTitleStyle = TextStyle(fontSize: 26, color: Colors.grey);
+  final _subTitleStyle = TextStyle(fontSize: 16, color: Colors.grey);
 }
