@@ -109,7 +109,7 @@ class _ResultPageState extends State<ResultPage> {
             return {
               'docId': doc.id, // 문서 ID 추가
               'category': data['category'],
-              'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
+              'pickMeUp': data['data']['탑승 장소'], // 수정된 변수명
               'destination': data['data']['목적지'], // 수정된 변수명
               'time': data['data']['탑승 시간'], // 수정된 변수명
               'peopleCount': data['data']['인원 수'], // 수정된 변수명
@@ -176,20 +176,22 @@ class _ResultPageState extends State<ResultPage> {
                   SizedBox(height: 8),
                   Text(
                     "목적지: ${bread['destination'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
+                  Text(
+                    "탑승 시간: ${bread['time'] ?? '정보 없음'}"
+                  ),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
+                  Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
+                  Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
                 ],
                 SizedBox(height: 10),
                 Text("세부사항: ${bread['detail'] ?? '없음'}"),
-                SizedBox(height: 10),
-                Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
                 Spacer(),
                 Center(
                   child: ElevatedButton(

@@ -229,6 +229,7 @@ class _AddPageState extends State<AddPage> {
         '주문 시간': orderTimeController.text,
         '픽업 시간': pickupTimeController.text,
         '픽업 위치': pickMeUpController.text,
+        '인원 수': peopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "택시팟빵") {
@@ -313,6 +314,7 @@ class _AddPageState extends State<AddPage> {
           await FirebaseFirestore.instance.collection('bread').add({
         'category': selectedCategory,
         'data': inputData,
+        'peopleCount': peopleCountController.text,
         'createdAt': Timestamp.now(),
         'lat': geoProvider.latitude,
         'lon': geoProvider.longitude,
