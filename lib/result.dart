@@ -213,8 +213,18 @@ class _ResultPageState extends State<ResultPage> {
                           // 문서 ID가 없으면 추가
                           if (!interactedDocs.contains(bread['docId'])) {
                             await userDoc.update({
-                              'interactedDocs': FieldValue.arrayUnion(
-                                  [bread['docId']]) // 문서 ID 추가
+                              'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                            });
+
+                            // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
+                            final breadDoc = FirebaseFirestore.instance
+                                .collection('bread')
+                                .doc(bread['docId']);
+                            final breadSnapshot = await breadDoc.get();
+                            final currentPeopleCount = breadSnapshot.data()?['data']['현재 인원 수'] ?? 0;
+
+                            await breadDoc.update({
+                              'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
                             });
                           }
 
