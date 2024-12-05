@@ -145,14 +145,14 @@ class _AddPageState extends State<AddPage> {
         child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
       ),
       Text("주문 시간", style: _fieldTitleStyle),
-      _buildTimeField("주문 시간을 선택하세요", orderTimeController),
+      _buildTimeField("주문 시간을 선택하세요.", orderTimeController),
       Text("픽업 시간", style: _fieldTitleStyle),
-      _buildTimeField("픽업 시간을 선택하세요", pickupTimeController),
+      _buildTimeField("픽업 시간을 선택하세요.", pickupTimeController),
       Text("픽업 장소", style: _fieldTitleStyle),
       Row(
         children: [
           Expanded(
-            child: _buildTextField("정확한 장소를 입력해주세요.", pickMeUpController),
+            child: _buildTextField("더 자세히 장소를 입력해주세요.", pickMeUpController),
           ),
           IconButton(
             icon: const Icon(Icons.map),
@@ -185,7 +185,7 @@ class _AddPageState extends State<AddPage> {
       Row(
         children: [
           Expanded(
-            child: _buildTextField("추가적인 탑승 장소를 입력하세요.", pickMeUpController),
+            child: _buildTextField("더 자세히 탑승 장소를 입력하세요.", pickMeUpController),
           ),
           IconButton(
             icon: const Icon(Icons.map),
@@ -236,7 +236,7 @@ class _AddPageState extends State<AddPage> {
       Row(
         children: [
           Expanded(
-            child: _buildTextField("장소를 입력하세요.", pickMeUpController),
+            child: _buildTextField("더 자세히 장소를 입력하세요.", pickMeUpController),
           ),
           IconButton(
             icon: const Icon(Icons.map),
