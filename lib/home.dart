@@ -26,6 +26,48 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Widget _categoryButton(String category) {
+    return Flexible(
+        child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white, // 버튼 배경색
+        shape: BoxShape.circle, // 원형으로 만들기
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2), // 그림자 색
+            spreadRadius: 2, // 그림자의 확장 범위
+            blurRadius: 5, // 그림자의 흐림 정도
+            offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+          ),
+        ],
+      ),
+      child: TextButton(
+        onPressed: () {
+          int argument = 0; // 기본 값 설정
+          if (category == "배달팟빵") {
+            argument = 0;
+          } else if (category == "택시팟빵") {
+            argument = 1;
+          } else if (category == "공구팟빵") {
+            argument = 2;
+          } else if (category == "기타팟빵") {
+            argument = 3;
+          }
+          Navigator.pushNamed(context, '/result', arguments: argument);
+        },
+        style: TextButton.styleFrom(
+          shape: CircleBorder(),
+          padding: EdgeInsets.all(20),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Text(
+          category,
+          style: TextStyle(),
+        ),
+      ),
+    ));
+  }
+
   double calculateDistance(
       double startLat, double startLon, double endLat, double endLon) {
     return Geolocator.distanceBetween(startLat, startLon, endLat, endLon);
@@ -122,6 +164,7 @@ class _HomePageState extends State<HomePage> {
             })
             .where((bread) => bread != null) // null 빼고 받아옴
             .cast<Map<String, dynamic>>() // 명시적 캐스팅, 리스트의 타입
+            .take(4) // 불러올 개수
             .toList();
 
         isLoading = false;
@@ -281,70 +324,76 @@ class _HomePageState extends State<HomePage> {
                                 "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
                             final subtitle = bread['detail'] ?? '세부 정보 없음';
 
-                            return InkWell(
-                              onTap: () => showBreadDetails(bread),
-                              child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white, // 배경색 설정
-                                    borderRadius:
-                                        BorderRadius.circular(10), // 둥근 모서리 설정
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black
-                                            .withOpacity(0.1), // 그림자 색
-                                        spreadRadius: 2, // 그림자의 확장 범위
-                                        blurRadius: 5, // 그림자의 흐림 정도
-                                        offset:
-                                            Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                            return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: InkWell(
+                                  onTap: () => showBreadDetails(bread),
+                                  child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white, // 배경색 설정
+                                        borderRadius: BorderRadius.circular(
+                                            10), // 둥근 모서리 설정
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withOpacity(0.2), // 그림자 색
+                                            spreadRadius: 2, // 그림자의 확장 범위
+                                            blurRadius: 5, // 그림자의 흐림 정도
+                                            offset: Offset(
+                                                1, 1), // 그림자의 위치 (x, y 방향)
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: ListTile(
-                                    title: Text(
-                                      title,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF574142),
-                                      ),
-                                    ),
-                                    subtitle: Text(subtitle),
-                                    trailing: Icon(Icons.arrow_forward),
-                                    onTap: () => {showBreadDetails(bread)},
-                                  )),
-                            );
+                                      child: ListTile(
+                                        title: Text(
+                                          title,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF574142),
+                                          ),
+                                        ),
+                                        subtitle: Text(subtitle),
+                                        trailing: Icon(Icons.arrow_forward),
+                                        onTap: () => {showBreadDetails(bread)},
+                                      )),
+                                ));
                           }
-                          return InkWell(
-                            onTap: () => showBreadDetails(bread),
-                            child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white, // 배경색 설정
-                                  borderRadius:
-                                      BorderRadius.circular(10), // 둥근 모서리 설정
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black
-                                          .withOpacity(0.1), // 그림자 색
-                                      spreadRadius: 2, // 그림자의 확장 범위
-                                      blurRadius: 5, // 그림자의 흐림 정도
-                                      offset: Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                          return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: InkWell(
+                                onTap: () => showBreadDetails(bread),
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white, // 배경색 설정
+                                      borderRadius: BorderRadius.circular(
+                                          10), // 둥근 모서리 설정
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withOpacity(0.2), // 그림자 색
+                                          spreadRadius: 2, // 그림자의 확장 범위
+                                          blurRadius: 5, // 그림자의 흐림 정도
+                                          offset:
+                                              Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                child: ListTile(
-                                  title: Text(
-                                    bread['name'] ?? '이름 없음',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF574142),
-                                    ),
-                                  ),
-                                  subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
-                                  // trailing: Icon(Icons.arrow_forward),
-                                  onTap: () => {showBreadDetails(bread)},
-                                )),
-                          );
+                                    child: ListTile(
+                                      title: Text(
+                                        bread['name'] ?? '이름 없음',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF574142),
+                                        ),
+                                      ),
+                                      subtitle:
+                                          Text(bread['detail'] ?? '상세 정보 없음'),
+                                      // trailing: Icon(Icons.arrow_forward),
+                                      onTap: () => {showBreadDetails(bread)},
+                                    )),
+                              ));
                         },
                       ),
                     )
@@ -370,127 +419,10 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, // 버튼 배경색
-                          shape: BoxShape.circle, // 원형으로 만들기
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2), // 그림자 색
-                              spreadRadius: 2, // 그림자의 확장 범위
-                              blurRadius: 5, // 그림자의 흐림 정도
-                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
-                            ),
-                          ],
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/result',
-                              arguments: 0,
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(20),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            '배달팟빵',
-                            style: TextStyle(),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, // 버튼 배경색
-                          shape: BoxShape.circle, // 원형으로 만들기
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2), // 그림자 색
-                              spreadRadius: 2, // 그림자의 확장 범위
-                              blurRadius: 5, // 그림자의 흐림 정도
-                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
-                            ),
-                          ],
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/result',
-                              arguments: 1,
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(20),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            '택시팟빵',
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, // 버튼 배경색
-                          shape: BoxShape.circle, // 원형으로 만들기
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2), // 그림자 색
-                              spreadRadius: 2, // 그림자의 확장 범위
-                              blurRadius: 5, // 그림자의 흐림 정도
-                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
-                            ),
-                          ],
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/result',
-                              arguments: 2,
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(20),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text('공구팟빵'),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, // 버튼 배경색
-                          shape: BoxShape.circle, // 원형으로 만들기
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2), // 그림자 색
-                              spreadRadius: 2, // 그림자의 확장 범위
-                              blurRadius: 5, // 그림자의 흐림 정도
-                              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
-                            ),
-                          ],
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/result',
-                              arguments: 3,
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(20),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text('기타팟빵'),
-                        ),
-                      ),
+                      _categoryButton("배달팟빵"),
+                      _categoryButton("택시팟빵"),
+                      _categoryButton("공구팟빵"),
+                      _categoryButton("기타팟빵"),
                     ],
                   )
                 ],
