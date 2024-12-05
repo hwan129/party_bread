@@ -325,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                             final subtitle = bread['detail'] ?? '세부 정보 없음';
 
                             return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 5),
+                                padding: EdgeInsets.symmetric(vertical: 8),
                                 child: InkWell(
                                   onTap: () => showBreadDetails(bread),
                                   child: Container(
@@ -360,7 +360,7 @@ class _HomePageState extends State<HomePage> {
                                 ));
                           }
                           return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 5),
+                              padding: EdgeInsets.symmetric(vertical: 8),
                               child: InkWell(
                                 onTap: () => showBreadDetails(bread),
                                 child: Container(

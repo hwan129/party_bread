@@ -68,14 +68,13 @@ class _AddPageState extends State<AddPage> {
                   child: ElevatedButton(
                     onPressed: _showConfirmationModal,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF574142), // 배경색을 갈색으로 설정
-                      foregroundColor: Colors.white, // 글자 색을 흰색으로 설정
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 110,
-                          vertical: 16), // 버튼의 크기를 키우기 위한 패딩 설정
-                      textStyle: TextStyle(fontSize: 18), // 글자 크기 설정
+                      backgroundColor: Color(0xFF574142),
+                      foregroundColor: Colors.white,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 110, vertical: 16),
+                      textStyle: TextStyle(fontSize: 18),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0), // 원하는 반경 설정
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
                     ),
                     child: const Text(
@@ -103,10 +102,10 @@ class _AddPageState extends State<AddPage> {
           shape: BoxShape.circle, // 원형으로 만들기
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3), // 그림자 색
-              spreadRadius: 2, // 그림자의 확장 범위
-              blurRadius: 7, // 그림자의 흐림 정도
-              offset: Offset(0, 4), // 그림자의 위치 (x, y 방향)
+              color: Colors.black.withOpacity(0.3), // 색
+              spreadRadius: 2, // 확장 범위
+              blurRadius: 7, // 흐림 정도
+              offset: Offset(0, 4), // 그림자 위치
             ),
           ],
         ),
@@ -121,10 +120,10 @@ class _AddPageState extends State<AddPage> {
             shape: CircleBorder(),
             padding: EdgeInsets.all(27),
             backgroundColor: isSelected
-                ? Color(0xFF574142) // 선택된 버튼은 갈색
-                : Color(0xFFE5D6D6), // 나머지는 흰색
+                ? Color(0xFF574142) // 선택된 버튼 갈색
+                : Color(0xFFE5D6D6), // 나머지 흰색
             foregroundColor:
-                isSelected ? Colors.white : Color(0xFF574142), // 텍스트 색상 설정
+                isSelected ? Colors.white : Color(0xFF574142), // 텍스트 색상
           ),
           child: Text(
             category,
@@ -262,7 +261,7 @@ class _AddPageState extends State<AddPage> {
         controller: controller,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey[400]),
+          hintStyle: TextStyle(color: Colors.grey),
           enabledBorder: UnderlineInputBorder(
             // 기본 상태의 밑줄
             borderSide: BorderSide(color: Colors.grey),
@@ -287,7 +286,7 @@ class _AddPageState extends State<AddPage> {
               controller: controller,
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: Colors.grey),
                 border: OutlineInputBorder(),
               ),
 

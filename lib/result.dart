@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';  // FirebaseAuth 추가
+import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth 추가
 import '../provider.dart';
 
 class ResultPage extends StatefulWidget {
@@ -106,32 +106,31 @@ class _ResultPageState extends State<ResultPage> {
 
               if (distance <= 1000) {
                 if (categoryName == '택시팟빵') {
-            return {
-              'docId': doc.id, // 문서 ID 추가
-              'category': data['category'],
-              'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
-              'destination': data['data']['목적지'], // 수정된 변수명
-              'time': data['data']['탑승 시간'], // 수정된 변수명
-              'peopleCount': data['data']['인원 수'], // 수정된 변수명
-              'detail': data['data']['추가 사항'], // 수정된 변수명
-            };
-          }
+                  return {
+                    'docId': doc.id, // 문서 ID 추가
+                    'category': data['category'],
+                    'pickMeUp': data['data']['픽업 위치'], // 수정된 변수명
+                    'destination': data['data']['목적지'], // 수정된 변수명
+                    'time': data['data']['탑승 시간'], // 수정된 변수명
+                    'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                    'detail': data['data']['추가 사항'], // 수정된 변수명
+                  };
+                }
 
-          return {
-            'docId': doc.id, // 문서 ID 추가
-            'category': data['category'],
-            'name': data['data']['음식 이름'], // 수정된 변수명
-            'orderTime': data['data']['주문 시간'], // 수정된 변수명
-            'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
-            'peopleCount': data['data']['인원 수'], // 수정된 변수명
-            'detail': data['data']['추가 사항'], // 수정된 변수명
-          };
+                return {
+                  'docId': doc.id, // 문서 ID 추가
+                  'category': data['category'],
+                  'name': data['data']['음식 이름'], // 수정된 변수명
+                  'orderTime': data['data']['주문 시간'], // 수정된 변수명
+                  'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+                  'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                  'detail': data['data']['추가 사항'], // 수정된 변수명
+                };
               }
             })
             .where((bread) => bread != null) // null 제거
             .cast<Map<String, dynamic>>() // 명시적 캐스팅
             .toList();
-
 
         isLoading = false;
       });
@@ -199,16 +198,20 @@ class _ResultPageState extends State<ResultPage> {
 
                         if (user != null) {
                           // Firestore에서 user 컬렉션에 접근
-                          final userDoc = FirebaseFirestore.instance.collection('user').doc(user.uid);
+                          final userDoc = FirebaseFirestore.instance
+                              .collection('user')
+                              .doc(user.uid);
 
                           // 유저의 interactedDocs 배열에 해당 문서 ID가 존재하는지 확인
                           final userSnapshot = await userDoc.get();
-                          final interactedDocs = List<String>.from(userSnapshot.data()?['interactedDocs'] ?? []);
+                          final interactedDocs = List<String>.from(
+                              userSnapshot.data()?['interactedDocs'] ?? []);
 
                           // 문서 ID가 없으면 추가
                           if (!interactedDocs.contains(bread['docId'])) {
                             await userDoc.update({
-                              'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                              'interactedDocs': FieldValue.arrayUnion(
+                                  [bread['docId']]) // 문서 ID 추가
                             });
                           }
 
@@ -240,56 +243,122 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("$categoryName 팟빵")),
-      body: Column(
-        children: [
-          Expanded(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : breads.isEmpty
-                    ? Center(child: Text("해당 카테고리의 빵이 없습니다."))
-                    : ListView.builder(
-                        itemCount: breads.length,
-                        itemBuilder: (context, index) {
-                          final bread = breads[index];
-                          if (categoryName == '택시팟빵') {
-                            final title =
-                                "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
-                            final subtitle = bread['detail'] ?? '세부 정보 없음';
+        appBar: AppBar(title: Text("$categoryName 팟빵")),
+        body: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : breads.isEmpty
+                        ? Center(child: Text("해당 카테고리의 빵이 없습니다."))
+                        : ListView.builder(
+                            itemCount: breads.length,
+                            itemBuilder: (context, index) {
+                              final bread = breads[index];
+                              if (categoryName == '택시팟빵') {
+                                final title =
+                                    "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
+                                final subtitle = bread['detail'] ?? '세부 정보 없음';
 
-                            return ListTile(
-                              title: Text(title),
-                              subtitle: Text(subtitle),
-                              trailing: Icon(Icons.arrow_forward),
-                              onTap: () => showBreadDetails(bread),
-                            );
-                          }
-                          return ListTile(
-                            title: Text(bread['name'] ?? '이름 없음'),
-                            subtitle: Text(bread['detail'] ?? '상세 정보 없음'),
-                            trailing: Icon(Icons.arrow_forward),
-                            onTap: () => showBreadDetails(bread),
-                          );
-                        },
+                                return Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: InkWell(
+                                      onTap: () => showBreadDetails(bread),
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white, // 배경색 설정
+                                            borderRadius: BorderRadius.circular(
+                                                10), // 둥근 모서리 설정
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.2), // 그림자 색
+                                                spreadRadius: 2, // 그림자의 확장 범위
+                                                blurRadius: 5, // 그림자의 흐림 정도
+                                                offset: Offset(
+                                                    1, 1), // 그림자의 위치 (x, y 방향)
+                                              ),
+                                            ],
+                                          ),
+                                          child: ListTile(
+                                            title: Text(title),
+                                            subtitle: Text(subtitle),
+                                          )),
+                                    ));
+                              }
+                              return Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8),
+                                  child: InkWell(
+                                    onTap: () => showBreadDetails(bread),
+                                    child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white, // 배경색 설정
+                                          borderRadius: BorderRadius.circular(
+                                              10), // 둥근 모서리 설정
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black
+                                                  .withOpacity(0.2), // 그림자 색
+                                              spreadRadius: 1, // 그림자의 확장 범위
+                                              blurRadius: 4, // 그림자의 흐림 정도
+                                              offset: Offset(
+                                                  1, 1), // 그림자의 위치 (x, y 방향)
+                                            ),
+                                          ],
+                                        ),
+                                        child: ListTile(
+                                          title: Text(bread['name'] ?? '이름 없음'),
+                                          subtitle: Text(
+                                              bread['detail'] ?? '상세 정보 없음'),
+                                        )),
+                                  ));
+                            },
+                          ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "원하는 팟빵이 없으신가요?",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  Text(
+                    "새로운 팟빵을 만들어보세요!",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/add');
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Color(0xFF574142),
+                        foregroundColor: Colors.white,
+                        padding:
+                            EdgeInsets.symmetric(vertical: 13, horizontal: 80),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                       ),
+                      child: const Text(
+                        '반죽하러 가기',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text("원하시는 팟빵이 없으신가?"),
-                Text("만들자!"),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/add');
-                  },
-                  child: const Text('반죽하러 가기'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }
