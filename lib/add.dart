@@ -341,7 +341,8 @@ class _AddPageState extends State<AddPage> {
               );
               if (pickedDate != null) {
                 // Date Picker에서 선택한 날짜를 텍스트로 설정
-                controller.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                controller.text =
+                    "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
               }
             },
           ),
@@ -349,7 +350,6 @@ class _AddPageState extends State<AddPage> {
       ),
     );
   }
-
 
   // 팝업 모달 표시
   void _showConfirmationModal() {

@@ -105,19 +105,17 @@ class _ResultPageState extends State<ResultPage> {
               }
 
               if (distance <= 1000) {
-                if (categoryName == '택시팟빵') {
+                if (data['category'] == '택시팟빵') {
                   return {
-                    'docId': doc.id, // 문서 ID 추가
                     'category': data['category'],
-                    'pickMeUp': data['data']['탑승 장소'], // 수정된 변수명
-                    'destination': data['data']['목적지'], // 수정된 변수명
-                    'time': data['data']['탑승 시간'], // 수정된 변수명
-                    'peopleCount': data['data']['인원 수'], // 수정된 변수명
-                    'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
-                    'detail': data['data']['추가 사항'], // 수정된 변수명
+                    'pickMeUp': data['data']['탑승 장소'],
+                    'destination': data['data']['목적지'],
+                    'deadline': data['data']['탑승 시간'],
+                    'peopleCount': data['data']['인원 수'],
+                    'currentpeopleCount': data['data']['현재 인원 수'],
+                    'detail': data['data']['추가 사항'],
                   };
-                }
-                else if (categoryName == '공구팟빵') {
+                } else if (categoryName == '공구팟빵') {
                   return {
                     'docId': doc.id, // 문서 ID 추가
                     'category': data['category'],
@@ -146,13 +144,12 @@ class _ResultPageState extends State<ResultPage> {
                     'category': data['category'],
                     'name': data['data']['음식 이름'], // 수정된 변수명
                     'orderTime': data['data']['주문 시간'], // 수정된 변수명
-                    'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+                    'deadline': data['data']['픽업 시간'], // 수정된 변수명
                     'peopleCount': data['data']['인원 수'], // 수정된 변수명
                     'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
                     'detail': data['data']['추가 사항'], // 수정된 변수명
                   };
                 }
-
               }
             })
             .where((bread) => bread != null) // null 제거
@@ -207,14 +204,14 @@ class _ResultPageState extends State<ResultPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text("탑승 시간: ${bread['time'] ?? '정보 없음'}"),
+                  Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}"),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                  Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
+                  Text("픽업 시간: ${bread['deadline'] ?? '미정'}"),
                 ],
                 SizedBox(height: 10),
                 Text(
@@ -239,9 +236,6 @@ class _ResultPageState extends State<ResultPage> {
                           final userSnapshot = await userDoc.get();
                           final interactedDocs = List<String>.from(
                               userSnapshot.data()?['interactedDocs'] ?? []);
-
-
-
                           // 문서 ID가 없으면 추가
                           if (!interactedDocs.contains(bread['docId'])) {
                             // 'currentpeopleCount'와 'peopleCount'가 null이 아니고, int로 변환 가능한지 체크
@@ -315,6 +309,61 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
+  Widget _listTileBuild(Map<String, dynamic> bread) {
+    print('list bread : ${bread}');
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        child: InkWell(
+          onTap: () => showBreadDetails(bread),
+          child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white, // 배경색 설정
+                borderRadius: BorderRadius.circular(10), // 둥근 모서리 설정
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // 그림자 색
+                    spreadRadius: 2, // 그림자의 확장 범위
+                    blurRadius: 5, // 그림자의 흐림 정도
+                    offset: Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                  ),
+                ],
+              ),
+              child: ListTile(
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bread['category'] == '택시팟빵'
+                          ? "${bread['pickMeUp']} -> ${bread['destination']}"
+                          : '${bread['name']}',
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF574142),
+                      ),
+                    ),
+                  ],
+                ),
+                subtitle: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  // mainAxisAlignment: ,
+                  children: [
+                    Text(
+                      "${bread['category']}  |  ${bread['currentpeopleCount']} / ${bread['peopleCount']}  |  ${bread['deadline']}",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF574142),
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: Icon(Icons.arrow_forward),
+                onTap: () => {showBreadDetails(bread)},
+              )),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -333,63 +382,8 @@ class _ResultPageState extends State<ResultPage> {
                             itemCount: breads.length,
                             itemBuilder: (context, index) {
                               final bread = breads[index];
-                              if (categoryName == '택시팟빵') {
-                                final title =
-                                    "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
-                                final subtitle = bread['detail'] ?? '세부 정보 없음';
 
-                                return Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 8),
-                                    child: InkWell(
-                                      onTap: () => showBreadDetails(bread),
-                                      child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white, // 배경색 설정
-                                            borderRadius: BorderRadius.circular(
-                                                10), // 둥근 모서리 설정
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.2), // 그림자 색
-                                                spreadRadius: 2, // 그림자의 확장 범위
-                                                blurRadius: 5, // 그림자의 흐림 정도
-                                                offset: Offset(
-                                                    1, 1), // 그림자의 위치 (x, y 방향)
-                                              ),
-                                            ],
-                                          ),
-                                          child: ListTile(
-                                            title: Text(title),
-                                            subtitle: Text(subtitle),
-                                          )),
-                                    ));
-                              }
-                              return Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 8),
-                                  child: InkWell(
-                                    onTap: () => showBreadDetails(bread),
-                                    child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.white, // 배경색 설정
-                                          borderRadius: BorderRadius.circular(
-                                              10), // 둥근 모서리 설정
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black
-                                                  .withOpacity(0.2), // 그림자 색
-                                              spreadRadius: 1, // 그림자의 확장 범위
-                                              blurRadius: 4, // 그림자의 흐림 정도
-                                              offset: Offset(
-                                                  1, 1), // 그림자의 위치 (x, y 방향)
-                                            ),
-                                          ],
-                                        ),
-                                        child: ListTile(
-                                          title: Text(bread['name'] ?? '이름 없음'),
-                                          subtitle: Text(
-                                              bread['detail'] ?? '상세 정보 없음'),
-                                        )),
-                                  ));
+                              return _listTileBuild(bread);
                             },
                           ),
               ),
