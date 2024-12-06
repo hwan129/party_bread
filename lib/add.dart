@@ -18,7 +18,8 @@ class _AddPageState extends State<AddPage> {
   final TextEditingController pickMeUpController = TextEditingController();
   final TextEditingController pickupTimeController = TextEditingController();
   final TextEditingController peopleCountController = TextEditingController();
-  final TextEditingController currentpeopleCountController = TextEditingController(text: "1");
+  final TextEditingController currentpeopleCountController =
+      TextEditingController(text: "1");
   final TextEditingController destinationController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
 
@@ -324,8 +325,8 @@ class _AddPageState extends State<AddPage> {
         '픽업 위치': pickMeUpController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
-        ? "1"
-        : currentpeopleCountController.text,
+            ? "1"
+            : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "택시팟빵") {
@@ -335,8 +336,8 @@ class _AddPageState extends State<AddPage> {
         '탑승 장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
-        ? "1"
-        : currentpeopleCountController.text,
+            ? "1"
+            : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "공구팟빵") {
@@ -345,8 +346,8 @@ class _AddPageState extends State<AddPage> {
         '마감일': timeController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
-        ? "1"
-        : currentpeopleCountController.text,
+            ? "1"
+            : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     } else if (selectedCategory == "기타팟빵") {
@@ -356,8 +357,8 @@ class _AddPageState extends State<AddPage> {
         '장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
-        ? "1"
-        : currentpeopleCountController.text,
+            ? "1"
+            : currentpeopleCountController.text,
         '추가 사항': detailController.text,
       };
     }
