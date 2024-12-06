@@ -336,9 +336,9 @@ class _ResultPageState extends State<ResultPage> {
                 SizedBox(
                   height: 10,
                 ),
-                if (bread['category'] == '공구팟빵')
-                  ...[]
-                else ...[
+                if (bread['category'] == '공구팟빵') ...[
+                  Spacer()
+                ] else ...[
                   Text.rich(
                     TextSpan(
                       children: [

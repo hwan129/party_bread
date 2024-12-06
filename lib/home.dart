@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> {
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                         TextSpan(
-                            text: "${bread['deadline']} ?? '알 수 없음'",
+                            text: "${bread['deadline']}'",
                             style: TextStyle(fontSize: 20)),
                       ],
                     ),
@@ -374,9 +374,9 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 10,
                 ),
-                if (bread['category'] == '공구팟빵')
-                  ...[]
-                else ...[
+                if (bread['category'] == '공구팟빵') ...[
+                  Spacer()
+                ] else ...[
                   Text.rich(
                     TextSpan(
                       children: [
