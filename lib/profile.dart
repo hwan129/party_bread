@@ -123,113 +123,124 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Expanded(
-              child: TabBarView(
-                children: [
-                  // 프로필 화면
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundImage: NetworkImage(userProfileImage),
-                              backgroundColor: Colors.transparent,
-                            ),
-                            SizedBox(width: 16),
-                            Text(
-                              userName,
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Select Profile Image",
-                                style: TextStyle(fontSize: 18)),
-                            SizedBox(height: 10),
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                              ),
-                              itemCount: profileImages.length,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    _changeProfileImage(profileImages[index]);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 40,
-                                    backgroundImage:
-                                        NetworkImage(profileImages[index]),
-                                    backgroundColor: Colors.transparent,
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  // 활동 내역 화면
-                  activityHistory.isEmpty
-                      ? Center(
-                          child: Text("활동 내역이 없습니다.",
-                              style: TextStyle(
-                                  fontSize: 18, color: Colors.grey)),
-                        )
-                      : ListView.builder(
-  itemCount: activityHistory.length,
-  itemBuilder: (context, index) {
-    final activity = activityHistory[index];
-    final data = activity['data'] ?? {}; // data가 null일 경우 빈 Map을 사용
-    final category = activity['category'] ?? 'No Category'; // 카테고리 확인
-
-    // Debugging: data 출력 확인
-    print('Category: $category');
-    print('Data: $data');
-
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      elevation: 4.0,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Category: $category",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  child: TabBarView(
+    children: [
+      // 프로필 화면
+      Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: NetworkImage(userProfileImage),
+                  backgroundColor: Colors.transparent,
+                ),
+                SizedBox(width: 16),
+                Text(
+                  userName,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text("목적지: ${data['목적지'] ?? ''}"),
-            Text("탑승 시간: ${data['탑승 시간'] ?? 'N/A'}"),
-            Text("추가 사항: ${data['추가 사항'] ?? 'N/A'}"),
-            Text("탑승 장소: ${data['탑승 장소'] ?? 'N/A'}"),
-            Text("현재 인원 수: ${data['현재 인원 수'] ?? 'N/A'}"),
-          ],
-        ),
+          ),
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Select Profile Image", style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: profileImages.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        _changeProfileImage(profileImages[index]);
+                      },
+                      child: CircleAvatar(
+                        radius: 40,
+                        backgroundImage:
+                            NetworkImage(profileImages[index]),
+                        backgroundColor: Colors.transparent,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-    );
-  },
+      // 활동 내역 화면
+      activityHistory.isEmpty
+          ? Center(
+              child: Text("활동 내역이 없습니다.",
+                  style: TextStyle(fontSize: 18, color: Colors.grey)),
+            )
+          : ListView.builder(
+              itemCount: activityHistory.length,
+              itemBuilder: (context, index) {
+                final activity = activityHistory[index];
+                final data = activity['data'] ?? {}; // data가 null일 경우 빈 Map을 사용
+                final category = activity['category'] ?? 'No Category'; // 카테고리 확인
+
+                // Debugging: data 출력 확인
+                print('Category: $category');
+                print('Data: $data');
+
+                // 카테고리별로 title과 subtitle 설정
+                String title = '';
+                String subtitle = '';
+
+                if (category == "택시팟빵") {
+                  // 택시팟빵에 맞는 title과 subtitle 설정
+                  title =
+                      "${data['탑승 장소'] ?? '출발지 없음'} → ${data['목적지'] ?? '목적지 없음'}";
+                  subtitle = data['추가 사항'] ?? '추가 사항 없음';
+                } 
+                
+                else if (category == "배달팟빵") {
+                  title = data['음식 이름'] ?? '이름 없음';
+                  subtitle = data['추가 사항'] ?? '추가 사항 없음';
+                } 
+                
+                else if (category == "공구팟빵") {
+                  title = data['제품명'] ?? '이름 없음';
+                  subtitle = data['추가 사항'] ?? '추가 사항 없음';
+                } 
+                
+                else if (category == "기타팟빵") {
+                  title = data['이름'] ?? '이름 없음';
+                  subtitle = data['추가 사항'] ?? '추가 사항 없음';
+                } 
+        
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  elevation: 4.0,
+                  child: ListTile(
+                    title: Text(title),
+                    subtitle: Text(subtitle),
+                  ),
+                );
+              },
+            ),
+    ],
+  ),
 )
 
-                ],
-              ),
-            ),
+
+
+
           ],
         ),
       ),
