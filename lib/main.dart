@@ -65,7 +65,6 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.brown,
           )),
 
-      // initialRoute: '/receipt', // 시작 페이지 설정
       initialRoute: '/login', // 시작 페이지 설정
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
