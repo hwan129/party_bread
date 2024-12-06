@@ -12,6 +12,7 @@ import 'result.dart';
 import 'add.dart';
 import 'signup_page.dart';
 import 'receipt.dart';
+import 'search.dart';
 import 'chat_page.dart';
 import 'provider.dart';
 import 'maps/getlocation.dart';
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
           )),
 
       initialRoute: '/login', // 시작 페이지 설정
+      // initialRoute: '/home', // 시작 페이지 설정
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
         '/login': (context) => LoginPage(), // 로그인 페이지
@@ -76,7 +78,7 @@ class MyApp extends StatelessWidget {
         '/receipt': (context) => Receipt(
           roomId: ModalRoute.of(context)!.settings.arguments as String,
         ),
-
+        '/search': (context) => SearchPage(),
         '/signup': (context) => SignupPage(),
         '/sign_in_email': (context) => SignInEmailPage(),
         '/locationPermission': (context) =>

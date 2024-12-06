@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
   Widget _categoryButton(String category) {
     return Flexible(
         child: Container(
+          width: 80,
+      height: 85,
       decoration: BoxDecoration(
         color: Colors.white, // 버튼 배경색
         shape: BoxShape.circle, // 원형으로 만들기
@@ -58,12 +60,12 @@ class _HomePageState extends State<HomePage> {
         },
         style: TextButton.styleFrom(
           shape: CircleBorder(),
-          padding: EdgeInsets.all(20),
+          // padding: EdgeInsets.all(10),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: Text(
           category,
-          style: TextStyle(),
+          style: TextStyle(color: Color(0xFF574142), fontSize: 15, fontWeight: FontWeight.bold),
         ),
       ),
     ));
@@ -231,31 +233,49 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 if (bread['category'] == '택시팟빵') ...[
-                  Text(
-                    "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Text(
+                        "${bread['pickMeUp'] ?? '정보 없음'}",
+                        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "  ->  ",
+                        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "${bread['destination'] ?? '정보 없음'}",
+                        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
+                  // Text(
+                  //   "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
+                  //   style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                  // ),
                   SizedBox(height: 8),
-                  Text(
-                    "목적지: ${bread['destination'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  // Text(
+                  //   "목적지: ${bread['destination'] ?? '정보 없음'}",
+                  //   style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                  // ),
                   SizedBox(height: 16),
-                  Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}"),
+                  Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
                   ),
-                  Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                  Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
+                  SizedBox(height: 10),
+                  Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                  Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                 ],
                 SizedBox(height: 10),
                 Text(
                   "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
-                Text("세부사항: ${bread['detail'] ?? '없음'}"),
+                Text("세부사항: ${bread['detail'] ?? '없음'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                 Spacer(),
                 Center(
                   child: ElevatedButton(
@@ -337,7 +357,15 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
                     },
-                    child: Text('팟빵 함께 먹기'),
+                    child: Text('팟빵 함께 먹기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF574142),
+                      foregroundColor: Color(0xFFF5E0D3),
+                      minimumSize: Size(double.infinity, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -349,12 +377,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _listTileBuild(Map<String, dynamic> bread) {
-    print('list bread : ${bread}');
+    // print('list bread : ${bread}');
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: InkWell(
           onTap: () => showBreadDetails(bread),
           child: Container(
+            height: 85,
               decoration: BoxDecoration(
                 color: Colors.white, // 배경색 설정
                 borderRadius: BorderRadius.circular(10), // 둥근 모서리 설정
@@ -371,22 +400,18 @@ class _HomePageState extends State<HomePage> {
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(height: 3),
                     Text(
                       bread['category'] == '택시팟빵'
                           ? "${bread['pickMeUp']} -> ${bread['destination']}"
                           : '${bread['name']}',
                       style: TextStyle(
-                        fontSize: 23,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF574142),
                       ),
                     ),
-                  ],
-                ),
-                subtitle: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  // mainAxisAlignment: ,
-                  children: [
+                    // SizedBox(height: 2),
                     Text(
                       "${bread['category']}  |  ${bread['currentpeopleCount']} / ${bread['peopleCount']}  |  ${bread['deadline']}",
                       style: TextStyle(
@@ -408,7 +433,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           leading: Padding(
-            padding: EdgeInsets.fromLTRB(7, 0, 0, 0),
+            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
             child: Image.asset('assets/image/potbbang_ko.png'),
           ),
           title: Consumer<GeoProvider>(
@@ -417,7 +442,8 @@ class _HomePageState extends State<HomePage> {
                 geoProvider.Si != null
                     ? '${geoProvider.Si} ${geoProvider.Gu} ${geoProvider.Dong} ${geoProvider.street}'
                     : "주소를 가져오는 중...",
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(
+                    0xFFBAA3A3)),
               );
             },
           ),
@@ -443,16 +469,46 @@ class _HomePageState extends State<HomePage> {
               ),
             );
           }
+
+          String _searchQuery = ""; // 검색 내용 저장할 변수
           if (geoProvider.latitude != null && geoProvider.longitude != null) {
             return Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.fromLTRB(20, 10, 20, 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 20),
+                  TextField(
+                    onChanged: (value) {
+                      _searchQuery = value; // 입력 내용 저장
+                    },
+                    onSubmitted: (value) {
+                      if (value.isNotEmpty) {
+                        Navigator.pushNamed(context, '/search', arguments: value); // /search 페이지로 이동
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: "hihi 님, 어떤 팟빵을 찾으세요?",
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                      prefixIcon: Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Text(
-                    "곧 식어버리는 팟빵들이에요.",
+                    "곧 식어버리는 팟빵들이에요",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 25,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF574142),
                     ),
@@ -460,8 +516,8 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(
                     height: 5,
                   ),
-                  Text("완료되기까지"),
-                  Text("시간이 얼마남지 않았으니 서두르세요!"),
+                  Text("완료되기까지", style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold),),
+                  Text("시간이 얼마남지 않았으니 서두르세요!",  style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(
                     height: 10,
                   ),
@@ -490,7 +546,7 @@ class _HomePageState extends State<HomePage> {
                     child: Text(
                       "어떤 팟빵에 들어가고 싶으신가요?",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF574142),
                       ),
