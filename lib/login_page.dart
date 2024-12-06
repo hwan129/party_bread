@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -90,14 +91,24 @@ class _LoginPageState extends State<LoginPage> {
             // 구글 로그인 버튼
             ElevatedButton.icon(
               onPressed: _signInWithGoogle,
-              icon: Icon(Icons.login, color: Color(0xFF5B3A30)),
-              label: Text('Sign in with Google'),
+              // icon: SvgPicture.asset(
+              //   'assets/image/google_logo.svg', // Google 로고 경로
+              //   height: 24, // 아이콘 크기
+              //   width: 24,
+              // ),
+              icon: Image.asset(
+                'assets/image/google_logo.png', // PNG 로고 경로
+                height: 24,
+                width: 24,
+              ),
+              // icon: Icon(Icons.login, color: Color(0xFF5B3A30)),
+              label: Text('구글로 로그인', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFF5E0D3),
                 foregroundColor: Color(0xFF5B3A30),
-                minimumSize: Size(300, 50),
+                minimumSize: Size(300, 60),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
@@ -108,32 +119,45 @@ class _LoginPageState extends State<LoginPage> {
                 Navigator.pushNamed(context, '/sign_in_email');
               },
               icon: Icon(Icons.email, color: Color(0xFF5B3A30)),
-              label: Text('Sign in with Email'),
+              label: Text('이메일로 로그인', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFF5E0D3),
                 foregroundColor: Color(0xFF5B3A30),
-                minimumSize: Size(300, 50),
+                minimumSize: Size(300, 60),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 12),
             // 회원가입 버튼
-            ElevatedButton(
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
                 Navigator.pushNamed(context, '/signup');
               },
-              child: Text('Sign Up with Email'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFF5E0D3),
-                foregroundColor: Color(0xFF5B3A30),
-                minimumSize: Size(300, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+              child: Text(
+                '회원가입',
+                style: TextStyle(
+                  color: Color(0xFFF5E0D3), // 텍스트 색상
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, '/signup');
+            //   },
+            //   child: Text('이메일로 회원가입'),
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Color(0xFFF5E0D3),
+            //     foregroundColor: Color(0xFF5B3A30),
+            //     minimumSize: Size(300, 50),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(10),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

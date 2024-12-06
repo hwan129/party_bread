@@ -72,7 +72,11 @@ class MyApp extends StatelessWidget {
         '/result': (context) => ResultPage(), // 카테고리, 검색 결과 페이지
         '/profile': (context) => ProfilePage(), // 프로필 페이지
         '/add': (context) => AddPage(),
-        '/receipt': (context) => Receipt(),
+        // '/receipt': (context) => Receipt(),
+        '/receipt': (context) => Receipt(
+          roomId: ModalRoute.of(context)!.settings.arguments as String,
+        ),
+
         '/signup': (context) => SignupPage(),
         '/sign_in_email': (context) => SignInEmailPage(),
         '/locationPermission': (context) =>
