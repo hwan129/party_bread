@@ -122,12 +122,10 @@ class _ResultPageState extends State<ResultPage> {
                   return {
                     'docId': doc.id,
                     'category': data['category'],
-
-                    'name': data['data']['제품명'],
-                    'deadtime': data['data']['마감일'],
-                    'deadline': data['data']['마감 시간'],
+                    'name': data['data']['음식 이름'],
+                    'orderTime': data['data']['주문 시간'],
+                    'deadline': data['data']['픽업 시간'],
                     'meetArea': data['data']['픽업 위치'],
-
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
@@ -137,9 +135,8 @@ class _ResultPageState extends State<ResultPage> {
                   return {
                     'docId': doc.id,
                     'category': data['category'],
-                    'name': data['data']['이름'],
-                    'deadtime': data['data']['마감일'],
-
+                    'name': data['data']['제품명'],
+                    'deadline': data['data']['마감일'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
@@ -442,8 +439,7 @@ class _ResultPageState extends State<ResultPage> {
                                         currentPeopleCount + 1, // 현재 인원 수 +1
                                   });
 
-                                 await createChatRoom(bread['docId']);
-
+                                  await createChatRoom(bread['docId']);
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('인원이 다 찼습니다!')),
@@ -598,13 +594,15 @@ class _ResultPageState extends State<ResultPage> {
           ),
         ));
   }
+
   Future<void> createChatRoom(String docId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
         // 새로운 채팅방 문서를 Firestore에 생성
-        final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc(docId);
+        final chatRoomRef =
+            FirebaseFirestore.instance.collection('chatRooms').doc(docId);
 
         // 이미 채팅방이 존재하는지 확인 (중복 생성 방지)
         final chatRoomSnapshot = await chatRoomRef.get();
@@ -642,4 +640,3 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 }
-
