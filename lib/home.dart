@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
               }
 
               if (distance <= 1000) {
-                if (data['categoryName'] == '택시팟빵') {
+                if (data['category'] == '택시팟빵') {
                   return {
                     'category': data['category'],
                     'pickMeUp': data['data']['탑승 장소'],
@@ -152,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
                   };
-                } else if (data['categoryName'] == '배달팟빵') {
+                } else if (data['category'] == '배달팟빵') {
                   return {
                     'category': data['category'],
                     'name': data['data']['음식 이름'],
@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
                   };
-                } else if (data['categoryName'] == '공구팟빵') {
+                } else if (data['category'] == '공구팟빵') {
                   return {
                     'category': data['category'],
                     'name': data['data']['제품명'],
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
                   };
-                } else if (data['categoryName'] == '기타팟빵') {
+                } else if (data['category'] == '기타팟빵') {
                   return {
                     'category': data['category'],
                     'name': data['data']['이름'],
@@ -237,9 +237,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text(
-                    "탑승 시간: ${bread['time'] ?? '정보 없음'}"
-                  ),
+                  Text("탑승 시간: ${bread['time'] ?? '정보 없음'}"),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
@@ -249,7 +247,6 @@ class _HomePageState extends State<HomePage> {
                   Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
                 ],
                 SizedBox(height: 10),
-                
                 Text(
                   "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
                 ),
@@ -285,19 +282,24 @@ class _HomePageState extends State<HomePage> {
                           final dynamic peopleCountRaw =
                               breadSnapshot.data()?['data']['인원 수'] ?? 0;
 
-                          final int currentPeopleCount = int.tryParse(currentPeopleCountRaw.toString()) ?? 0;
-                          final int peopleCount = int.tryParse(peopleCountRaw.toString()) ?? 0;
+                          final int currentPeopleCount =
+                              int.tryParse(currentPeopleCountRaw.toString()) ??
+                                  0;
+                          final int peopleCount =
+                              int.tryParse(peopleCountRaw.toString()) ?? 0;
 
                           if (currentPeopleCount < peopleCount) {
                             // interactedDocs에 문서 ID가 없으면 추가
                             if (!interactedDocs.contains(bread['docId'])) {
                               await userDoc.update({
-                                'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                                'interactedDocs': FieldValue.arrayUnion(
+                                    [bread['docId']]) // 문서 ID 추가
                               });
 
                               // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
                               await breadDoc.update({
-                                'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
+                                'data.현재 인원 수':
+                                    currentPeopleCount + 1, // 현재 인원 수 +1
                               });
                             }
 
@@ -332,8 +334,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _listTileBuild(Map<String, dynamic> bread, String title, maxPeople,
-      currentPeople, deadline) {
+  Widget _listTileBuild(Map<String, dynamic> bread) {
+    print('list bread : ${bread}');
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 8),
         child: InkWell(
@@ -353,14 +355,17 @@ class _HomePageState extends State<HomePage> {
               ),
               child: ListTile(
                 title: Text(
-                  title,
+                  bread['category'] == '택시팟빵'
+                      ? "${bread['pickMeUp']} => ${bread['destination']}"
+                      : bread['name'],
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF574142),
                   ),
                 ),
-                subtitle: Text("${currentPeople} / ${maxPeople}"),
+                subtitle: Text(
+                    "${bread['currentpeopleCount']} / ${bread['peopleCount']}"),
                 trailing: Icon(Icons.arrow_forward),
                 onTap: () => {showBreadDetails(bread)},
               )),
@@ -440,48 +445,7 @@ class _HomePageState extends State<HomePage> {
                         itemCount: breads.length,
                         itemBuilder: (context, index) {
                           final bread = breads[index];
-                          if (bread['categoryName'] == '택시팟빵') {
-                            final title =
-                                "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
-                            final subtitle = bread['detail'] ?? '세부 정보 없음';
-
-                            // _listTileBuild(bread, title, maxPeople,
-                            //     currentPeople, deadline);
-                            // return Padding(
-                            //     padding: EdgeInsets.symmetric(vertical: 8),
-                            //     child: InkWell(
-                            //       onTap: () => showBreadDetails(bread),
-                            //       child: Container(
-                            //           decoration: BoxDecoration(
-                            //             color: Colors.white, // 배경색 설정
-                            //             borderRadius: BorderRadius.circular(
-                            //                 10), // 둥근 모서리 설정
-                            //             boxShadow: [
-                            //               BoxShadow(
-                            //                 color: Colors.black
-                            //                     .withOpacity(0.2), // 그림자 색
-                            //                 spreadRadius: 2, // 그림자의 확장 범위
-                            //                 blurRadius: 5, // 그림자의 흐림 정도
-                            //                 offset: Offset(
-                            //                     1, 1), // 그림자의 위치 (x, y 방향)
-                            //               ),
-                            //             ],
-                            //           ),
-                            //           child: ListTile(
-                            //             title: Text(
-                            //               title,
-                            //               style: TextStyle(
-                            //                 fontSize: 20,
-                            //                 fontWeight: FontWeight.bold,
-                            //                 color: Color(0xFF574142),
-                            //               ),
-                            //             ),
-                            //             subtitle: Text(subtitle),
-                            //             trailing: Icon(Icons.arrow_forward),
-                            //             onTap: () => {showBreadDetails(bread)},
-                            //           )),
-                            //     ));
-                          }
+                          return _listTileBuild(bread);
                         },
                       ),
                     )

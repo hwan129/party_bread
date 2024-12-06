@@ -152,13 +152,16 @@ class _ResultPageState extends State<ResultPage> {
                     'detail': data['data']['추가 사항'], // 수정된 변수명
                   };
                 }
+
               }
             })
             .where((bread) => bread != null) // null 제거
             .cast<Map<String, dynamic>>() // 명시적 캐스팅
+            .take(4)
             .toList();
 
         isLoading = false;
+        print("bread ${breads}");
       });
     } catch (e) {
       setState(() {
@@ -204,9 +207,7 @@ class _ResultPageState extends State<ResultPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text(
-                    "탑승 시간: ${bread['time'] ?? '정보 없음'}"
-                  ),
+                  Text("탑승 시간: ${bread['time'] ?? '정보 없음'}"),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
@@ -216,7 +217,6 @@ class _ResultPageState extends State<ResultPage> {
                   Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
                 ],
                 SizedBox(height: 10),
-                
                 Text(
                   "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
                 ),

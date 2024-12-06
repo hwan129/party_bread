@@ -66,7 +66,6 @@ class MyApp extends StatelessWidget {
           )),
 
       initialRoute: '/login', // 시작 페이지 설정
-      // initialRoute: '/login', // 시작 페이지 설정
       routes: {
         '/home': (context) => HomePage(), // 메인 페이지
         '/login': (context) => LoginPage(), // 로그인 페이지
