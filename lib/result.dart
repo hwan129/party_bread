@@ -106,18 +106,17 @@ class _ResultPageState extends State<ResultPage> {
 
               if (distance <= 1000) {
                 if (categoryName == '택시팟빵') {
-
-            return {
-              'docId': doc.id, // 문서 ID 추가
-              'category': data['category'],
-              'pickMeUp': data['data']['탑승 장소'], // 수정된 변수명
-              'destination': data['data']['목적지'], // 수정된 변수명
-              'time': data['data']['탑승 시간'], // 수정된 변수명
-              'peopleCount': data['data']['인원 수'], // 수정된 변수명
-              'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
-              'detail': data['data']['추가 사항'], // 수정된 변수명
-            };
-          }
+                  return {
+                    'docId': doc.id, // 문서 ID 추가
+                    'category': data['category'],
+                    'pickMeUp': data['data']['탑승 장소'], // 수정된 변수명
+                    'destination': data['data']['목적지'], // 수정된 변수명
+                    'time': data['data']['탑승 시간'], // 수정된 변수명
+                    'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                    'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
+                    'detail': data['data']['추가 사항'], // 수정된 변수명
+                  };
+                }
 
                 return {
                   'docId': doc.id, // 문서 ID 추가
@@ -133,9 +132,11 @@ class _ResultPageState extends State<ResultPage> {
             })
             .where((bread) => bread != null) // null 제거
             .cast<Map<String, dynamic>>() // 명시적 캐스팅
+            .take(4)
             .toList();
 
         isLoading = false;
+        print("bread ${breads}");
       });
     } catch (e) {
       setState(() {
@@ -181,9 +182,7 @@ class _ResultPageState extends State<ResultPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text(
-                    "탑승 시간: ${bread['time'] ?? '정보 없음'}"
-                  ),
+                  Text("탑승 시간: ${bread['time'] ?? '정보 없음'}"),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
@@ -193,7 +192,6 @@ class _ResultPageState extends State<ResultPage> {
                   Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
                 ],
                 SizedBox(height: 10),
-                
                 Text(
                   "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
                 ),
@@ -229,19 +227,24 @@ class _ResultPageState extends State<ResultPage> {
                           final dynamic peopleCountRaw =
                               breadSnapshot.data()?['data']['인원 수'] ?? 0;
 
-                          final int currentPeopleCount = int.tryParse(currentPeopleCountRaw.toString()) ?? 0;
-                          final int peopleCount = int.tryParse(peopleCountRaw.toString()) ?? 0;
+                          final int currentPeopleCount =
+                              int.tryParse(currentPeopleCountRaw.toString()) ??
+                                  0;
+                          final int peopleCount =
+                              int.tryParse(peopleCountRaw.toString()) ?? 0;
 
                           if (currentPeopleCount < peopleCount) {
                             // interactedDocs에 문서 ID가 없으면 추가
                             if (!interactedDocs.contains(bread['docId'])) {
                               await userDoc.update({
-                                'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                                'interactedDocs': FieldValue.arrayUnion(
+                                    [bread['docId']]) // 문서 ID 추가
                               });
 
                               // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
                               await breadDoc.update({
-                                'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
+                                'data.현재 인원 수':
+                                    currentPeopleCount + 1, // 현재 인원 수 +1
                               });
                             }
 
