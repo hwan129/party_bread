@@ -250,7 +250,6 @@ class _ResultPageState extends State<ResultPage> {
                                   0;
                           final int peopleCount =
                               int.tryParse(peopleCountRaw.toString()) ?? 0;
-
                           if (currentPeopleCount < peopleCount) {
                             // interactedDocs에 문서 ID가 없으면 추가
                             if (!interactedDocs.contains(bread['docId'])) {
