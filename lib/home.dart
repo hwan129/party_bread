@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/gestures.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -146,12 +148,13 @@ class _HomePageState extends State<HomePage> {
                   return {
                     'docId': doc.id,
                     'category': data['category'],
-                    'pickMeUp': data['data']['탑승 장소'],
+                    'meetArea': data['data']['탑승 장소'],
                     'destination': data['data']['목적지'],
                     'deadline': data['data']['탑승 시간'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
+                    'selected_loc': LatLng(selectedLat, selectedLon)
                   };
                 } else if (data['category'] == '배달팟빵') {
                   return {
@@ -160,10 +163,11 @@ class _HomePageState extends State<HomePage> {
                     'name': data['data']['음식 이름'],
                     'orderTime': data['data']['주문 시간'],
                     'deadline': data['data']['픽업 시간'],
-                    'pickupArea': data['data']['픽업 위치'],
+                    'meetArea': data['data']['픽업 위치'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
+                    'selected_loc': LatLng(selectedLat, selectedLon)
                   };
                 } else if (data['category'] == '공구팟빵') {
                   return {
@@ -174,6 +178,7 @@ class _HomePageState extends State<HomePage> {
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
+                    'selected_loc': LatLng(selectedLat, selectedLon)
                   };
                 } else if (data['category'] == '기타팟빵') {
                   return {
@@ -181,10 +186,11 @@ class _HomePageState extends State<HomePage> {
                     'category': data['category'],
                     'name': data['data']['이름'],
                     'deadline': data['data']['마감일'],
-                    'area': data['data']['장소'],
+                    'meetArea': data['data']['장소'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
+                    'selected_loc': LatLng(selectedLat, selectedLon)
                   };
                 }
               }
@@ -206,6 +212,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showBreadDetails(Map<String, dynamic> bread) {
+    print('detail bread:${bread}');
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -213,10 +220,12 @@ class _HomePageState extends State<HomePage> {
       ),
       isScrollControlled: true,
       builder: (BuildContext context) {
+        final geoProvider = Provider.of<GeoProvider>(context);
+        late GoogleMapController _mapController;
         return FractionallySizedBox(
-          heightFactor: 0.5,
+          heightFactor: 0.8,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -231,32 +240,186 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 if (bread['category'] == '택시팟빵') ...[
+                  //택시
                   Text(
-                    "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    "${bread['meetArea']} -> ${bread['destination']}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "목적지: ${bread['destination'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  SizedBox(
+                    height: 15,
                   ),
-                  SizedBox(height: 16),
-                  Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}"),
-                ] else ...[
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "탑승 시간 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20), // 볼드 처리
+                        ),
+                        TextSpan(
+                            text: "${bread['deadline'] ?? '알 수 없음'}",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ] else if (bread['category'] == '배달팟빵') ...[
+                  // 배달
                   Text(
                     bread['name'] ?? '제목 없음',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
                   ),
-                  Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                  Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "주문 시간 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20), // 볼드 처리
+                        ),
+                        TextSpan(
+                            text: "${bread['orderTime'] ?? '알 수 없음'}",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "픽업 시간 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20), // 볼드 처리
+                        ),
+                        TextSpan(
+                            text: "${bread['deadline'] ?? '알 수 없음'}",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ] else ...[
+                  // 공구, 기타
+                  Text(
+                    bread['name'],
+                    style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "마감일 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        TextSpan(
+                            text: "${bread['deadline']}'",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                 ],
-                SizedBox(height: 10),
-                Text(
-                  "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
+                // 공통
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "현재 인원 수 : ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20), // 볼드 처리
+                      ),
+                      TextSpan(
+                          text:
+                              "${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
+                          style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 10),
-                Text("세부사항: ${bread['detail'] ?? '없음'}"),
-                Spacer(),
+                SizedBox(
+                  height: 10,
+                ),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "세부사항: ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20), // 볼드 처리
+                      ),
+                      TextSpan(
+                          text: "${bread['detail'] ?? '없음'}",
+                          style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                if (bread['category'] == '공구팟빵') ...[
+                  Spacer()
+                ] else ...[
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                            text: "${bread['meetArea'] ?? '?'}",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20)),
+                        TextSpan(
+                          text: "  (으)로 모이세요!",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: bread['selected_loc'],
+                        zoom: 17,
+                      ),
+                      mapType: MapType.normal,
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                      },
+                      onTap: (LatLng coordinate) {
+                        _mapController.animateCamera(
+                          CameraUpdate.newLatLng(coordinate),
+                        );
+                        geoProvider.updateLocation(
+                            coordinate.latitude, coordinate.longitude);
+                      },
+                      markers: {
+                        Marker(
+                          markerId: MarkerId("1"),
+                          position: bread['selected_loc'],
+                        ),
+                      },
+                    ),
+                  ),
+                ],
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
@@ -274,21 +437,26 @@ class _HomePageState extends State<HomePage> {
                           final interactedDocs = List<String>.from(
                               userSnapshot.data()?['interactedDocs'] ?? []);
 
-
-
                           // 문서 ID가 없으면 추가
                           if (!interactedDocs.contains(bread['docId'])) {
                             // 'currentpeopleCount'와 'peopleCount'가 null이 아니고, int로 변환 가능한지 체크
-                            if (bread['currentpeopleCount'] != null && bread['peopleCount'] != null) {
+                            if (bread['currentpeopleCount'] != null &&
+                                bread['peopleCount'] != null) {
                               try {
                                 // String을 int로 변환
-                                int currentPeopleCount = int.tryParse(bread['currentpeopleCount'].toString()) ?? 0;
-                                int peopleCount = int.tryParse(bread['peopleCount'].toString()) ?? 0;
+                                int currentPeopleCount = int.tryParse(
+                                        bread['currentpeopleCount']
+                                            .toString()) ??
+                                    0;
+                                int peopleCount = int.tryParse(
+                                        bread['peopleCount'].toString()) ??
+                                    0;
 
                                 // 인원 수가 같지 않으면
                                 if (currentPeopleCount != peopleCount) {
                                   await userDoc.update({
-                                    'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                                    'interactedDocs': FieldValue.arrayUnion(
+                                        [bread['docId']]) // 문서 ID 추가
                                   });
 
                                   // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
@@ -296,12 +464,17 @@ class _HomePageState extends State<HomePage> {
                                       .collection('bread')
                                       .doc(bread['docId']);
                                   final breadSnapshot = await breadDoc.get();
-                                  String currentPeopleCountStr = breadSnapshot.data()?['data']['현재 인원 수']?.toString() ?? '0';
+                                  String currentPeopleCountStr = breadSnapshot
+                                          .data()?['data']['현재 인원 수']
+                                          ?.toString() ??
+                                      '0';
 
-                          // int로 변환
-                                  int currentPeopleCount = int.tryParse(currentPeopleCountStr) ?? 0;
+                                  // int로 변환
+                                  int currentPeopleCount =
+                                      int.tryParse(currentPeopleCountStr) ?? 0;
                                   await breadDoc.update({
-                                    'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
+                                    'data.현재 인원 수':
+                                        currentPeopleCount + 1, // 현재 인원 수 +1
                                   });
 
                                   // 채팅 화면으로 이동
@@ -314,7 +487,8 @@ class _HomePageState extends State<HomePage> {
                               } catch (e) {
                                 print('변환 오류 발생: $e');
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('숫자 변환 중 오류가 발생했습니다.')),
+                                  SnackBar(
+                                      content: Text('숫자 변환 중 오류가 발생했습니다.')),
                                 );
                               }
                             }
@@ -365,7 +539,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text(
                       bread['category'] == '택시팟빵'
-                          ? "${bread['pickMeUp']} -> ${bread['destination']}"
+                          ? "${bread['meetArea']} -> ${bread['destination']}"
                           : '${bread['name']}',
                       style: TextStyle(
                         fontSize: 23,
@@ -389,8 +563,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                trailing: Icon(Icons.arrow_forward),
-                onTap: () => {showBreadDetails(bread)},
               )),
         ));
   }
