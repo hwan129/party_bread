@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         'nickname': isGoogleSignIn ? user.displayName : '사용자 이름',
         'email': user.email ?? '이메일 없음',
         'uid': user.uid,
-        'isNewUser': true,
+        'isNewUser': false,
         'interactedDocs': [],
         'profileImage':
             "https://firebasestorage.googleapis.com/v0/b/party-bread.firebasestorage.app/o/potbbang.png?alt=media&token=d0f000c8-3dee-4cb0-8461-4d7bbf136c4b",

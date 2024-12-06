@@ -106,29 +106,52 @@ class _ResultPageState extends State<ResultPage> {
 
               if (distance <= 1000) {
                 if (categoryName == '택시팟빵') {
-
-            return {
-              'docId': doc.id, // 문서 ID 추가
-              'category': data['category'],
-              'pickMeUp': data['data']['탑승 장소'], // 수정된 변수명
-              'destination': data['data']['목적지'], // 수정된 변수명
-              'time': data['data']['탑승 시간'], // 수정된 변수명
-              'peopleCount': data['data']['인원 수'], // 수정된 변수명
-              'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
-              'detail': data['data']['추가 사항'], // 수정된 변수명
-            };
-          }
-
-                return {
-                  'docId': doc.id, // 문서 ID 추가
-                  'category': data['category'],
-                  'name': data['data']['음식 이름'], // 수정된 변수명
-                  'orderTime': data['data']['주문 시간'], // 수정된 변수명
-                  'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
-                  'peopleCount': data['data']['인원 수'], // 수정된 변수명
-                  'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
-                  'detail': data['data']['추가 사항'], // 수정된 변수명
-                };
+                  return {
+                    'docId': doc.id, // 문서 ID 추가
+                    'category': data['category'],
+                    'pickMeUp': data['data']['탑승 장소'], // 수정된 변수명
+                    'destination': data['data']['목적지'], // 수정된 변수명
+                    'time': data['data']['탑승 시간'], // 수정된 변수명
+                    'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                    'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
+                    'detail': data['data']['추가 사항'], // 수정된 변수명
+                  };
+                }
+                else if (categoryName == '공구팟빵') {
+                  return {
+                    'docId': doc.id, // 문서 ID 추가
+                    'category': data['category'],
+                    'name': data['data']['제품명'],
+                    'deadline': data['data']['마감일'],
+                    'peopleCount': data['data']['인원 수'],
+                    'currentpeopleCount': data['data']['현재 인원 수'],
+                    'detail': data['data']['추가 사항'],
+                  };
+                }
+                else if (categoryName == '기타팟빵') {
+                  return {
+                    'docId': doc.id, // 문서 ID 추가
+                    'category': data['category'],
+                    'name': data['data']['이름'],
+                    'deadline': data['data']['마감일'],
+                    'area': data['data']['장소'],
+                    'peopleCount': data['data']['인원 수'],
+                    'currentpeopleCount': data['data']['현재 인원 수'],
+                    'detail': data['data']['추가 사항'],
+                  };
+                }
+                else if (categoryName == '배달팟빵') {
+                  return {
+                    'docId': doc.id, // 문서 ID 추가
+                    'category': data['category'],
+                    'name': data['data']['음식 이름'], // 수정된 변수명
+                    'orderTime': data['data']['주문 시간'], // 수정된 변수명
+                    'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
+                    'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                    'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
+                    'detail': data['data']['추가 사항'], // 수정된 변수명
+                  };
+                }
               }
             })
             .where((bread) => bread != null) // null 제거
@@ -217,44 +240,60 @@ class _ResultPageState extends State<ResultPage> {
                           final interactedDocs = List<String>.from(
                               userSnapshot.data()?['interactedDocs'] ?? []);
 
-                          // Firestore에서 해당 bread 문서 가져오기
-                          final breadDoc = FirebaseFirestore.instance
-                              .collection('bread')
-                              .doc(bread['docId']);
-                          final breadSnapshot = await breadDoc.get();
 
-                          // 현재 인원 수와 최대 인원 수 가져오기
-                          final dynamic currentPeopleCountRaw =
-                              breadSnapshot.data()?['data']['현재 인원 수'] ?? 0;
-                          final dynamic peopleCountRaw =
-                              breadSnapshot.data()?['data']['인원 수'] ?? 0;
 
-                          final int currentPeopleCount = int.tryParse(currentPeopleCountRaw.toString()) ?? 0;
-                          final int peopleCount = int.tryParse(peopleCountRaw.toString()) ?? 0;
+                          // 문서 ID가 없으면 추가
+                          if (!interactedDocs.contains(bread['docId'])) {
+                            // 'currentpeopleCount'와 'peopleCount'가 null이 아니고, int로 변환 가능한지 체크
+                            if (bread['currentpeopleCount'] != null && bread['peopleCount'] != null) {
+                              try {
+                                // String을 int로 변환
+                                int currentPeopleCount = int.tryParse(bread['currentpeopleCount'].toString()) ?? 0;
+                                int peopleCount = int.tryParse(bread['peopleCount'].toString()) ?? 0;
 
-                          if (currentPeopleCount < peopleCount) {
-                            // interactedDocs에 문서 ID가 없으면 추가
-                            if (!interactedDocs.contains(bread['docId'])) {
-                              await userDoc.update({
-                                'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
-                              });
+                                // 인원 수가 같지 않으면
+                                if (currentPeopleCount != peopleCount) {
+                                  await userDoc.update({
+                                    'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                                  });
 
-                              // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
-                              await breadDoc.update({
-                                'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
-                              });
+                                  // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
+                                  final breadDoc = FirebaseFirestore.instance
+                                      .collection('bread')
+                                      .doc(bread['docId']);
+                                  final breadSnapshot = await breadDoc.get();
+                                  String currentPeopleCountStr = breadSnapshot.data()?['data']['현재 인원 수']?.toString() ?? '0';
+
+                          // int로 변환
+                          int currentPeopleCount = int.tryParse(currentPeopleCountStr) ?? 0;
+                                  print("현재원 : $currentPeopleCount");
+                                  await breadDoc.update({
+                                    'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
+                                  });
+
+                                  // 채팅 화면으로 이동
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/chatting',
+                                    arguments: {'roomId': bread['category']},
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('인원이 다 찼습니다!')),
+                                  );
+                                }
+                              } catch (e) {
+                                print('변환 오류 발생: $e');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('숫자 변환 중 오류가 발생했습니다.')),
+                                );
+                              }
                             }
-
-                            // 채팅 화면으로 이동
+                          } else {
                             Navigator.pushNamed(
                               context,
                               '/chatting',
                               arguments: {'roomId': bread['category']},
-                            );
-                          } else {
-                            // 인원이 다 찼을 경우 알림 출력
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('인원이 다 찼습니다!')),
                             );
                           }
                         }

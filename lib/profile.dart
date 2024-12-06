@@ -45,36 +45,39 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadActivityHistory() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DocumentSnapshot userDoc =
-          await _firestore.collection('user').doc(user.uid).get();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    DocumentSnapshot userDoc =
+        await _firestore.collection('user').doc(user.uid).get();
 
-      if (userDoc.exists && userDoc['interactedDocs'] != null) {
-        List<dynamic> interactedDocs = userDoc['interactedDocs'];
+    if (userDoc.exists && userDoc['interactedDocs'] != null) {
+      List<dynamic> interactedDocs = userDoc['interactedDocs'];
 
-        for (String docId in interactedDocs) {
-          DocumentSnapshot doc =
-              await _firestore.collection('bread').doc(docId).get();
+      for (String docId in interactedDocs) {
+        DocumentSnapshot doc =
+            await _firestore.collection('bread').doc(docId).get();
 
-          if (doc.exists) {
-            setState(() {
-              activityHistory.add({
-                'category': doc['category'] ?? '',
-                'data': {
-                  '음식 이름': doc['data']['음식 이름'] ?? '',
-                  '주문 시간': doc['data']['주문 시간'] ?? '',
-                  '추가 사항': doc['data']['추가 사항'] ?? '',
-                  '픽업 시간': doc['data']['픽업 시간'] ?? '',
-                  '픽업 위치': doc['data']['픽업 위치'] ?? '',
-                },
-              });
+        if (doc.exists) {
+          print('Fetched document: ${doc.data()}');  // 데이터 출력
+
+          setState(() {
+            activityHistory.add({
+              'category': doc['category'] ?? '',
+              'data': doc['data'] ?? {},
             });
-          }
+          });
+        } else {
+          print('Document not found for $docId');
         }
       }
+    } else {
+      print('No interacted docs found for the user');
     }
+  } else {
+    print('No current user found');
   }
+}
+
 
   Future<void> _changeProfileImage(String imageUrl) async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -189,43 +192,41 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontSize: 18, color: Colors.grey)),
                         )
                       : ListView.builder(
-                          itemCount: activityHistory.length,
-                          itemBuilder: (context, index) {
-                            final activity = activityHistory[index];
-                            final data = activity['data'];
-                            final category = activity['category'];
+  itemCount: activityHistory.length,
+  itemBuilder: (context, index) {
+    final activity = activityHistory[index];
+    final data = activity['data'] ?? {}; // data가 null일 경우 빈 Map을 사용
+    final category = activity['category'] ?? 'No Category'; // 카테고리 확인
 
-                            return Card(
-                              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                              elevation: 4.0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Category: $category",
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 8),
-                                    if (category == "택시팟빵") ...[
-                                      Text("목적지: ${data['음식 이름']}"),
-                                      Text("탑승 시간: ${data['주문 시간']}"),
-                                      Text("추가 사항: ${data['추가 사항']}"),
-                                      Text("탑승 장소: ${data['픽업 위치']}"),
-                                    ] else ...[
-                                      Text("음식 이름: ${data['음식 이름']}"),
-                                      Text("주문 시간: ${data['주문 시간']}"),
-                                      Text("추가 사항: ${data['추가 사항']}"),
-                                      Text("픽업 시간: ${data['픽업 시간']}"),
-                                      Text("픽업 위치: ${data['픽업 위치']}"),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        )
+    // Debugging: data 출력 확인
+    print('Category: $category');
+    print('Data: $data');
+
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      elevation: 4.0,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Category: $category",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text("목적지: ${data['목적지'] ?? ''}"),
+            Text("탑승 시간: ${data['탑승 시간'] ?? 'N/A'}"),
+            Text("추가 사항: ${data['추가 사항'] ?? 'N/A'}"),
+            Text("탑승 장소: ${data['탑승 장소'] ?? 'N/A'}"),
+            Text("현재 인원 수: ${data['현재 인원 수'] ?? 'N/A'}"),
+          ],
+        ),
+      ),
+    );
+  },
+)
+
                 ],
               ),
             ),
