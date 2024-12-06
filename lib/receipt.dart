@@ -5,17 +5,22 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:typed_data';
 
 class Receipt extends StatefulWidget {
   @override
   _ReceiptState createState() => _ReceiptState();
 }
 
-class _SignaturePainter extends CustomPainter {
+// 그림 판
+class _Painter extends CustomPainter {
   final List<Offset?> points;
+  _Painter(this.points);
 
-  _SignaturePainter(this.points);
-
+  // 펜 속성과.. 드래그하고 지나간 부분에 색칠하기
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
@@ -31,7 +36,7 @@ class _SignaturePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SignaturePainter oldDelegate) => true;
+  bool shouldRepaint(_Painter oldDelegate) => true;
 }
 
 class _ReceiptState extends State<Receipt> {
@@ -39,38 +44,39 @@ class _ReceiptState extends State<Receipt> {
   String? _totalAmount;
   String text = "";
   final picker = ImagePicker();
-
   List<Offset?> _points = [];
   GlobalKey _canvasKey = GlobalKey();
   bool _isZoomed = false;
   double _scale = 1.0;
-
   int peopleCount = 1;
 
+  // 영수증 이미지 갤러리에서 가져오기
   Future<void> _gallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
-        _points.clear(); // 그림판 초기화
+        _points.clear();
       });
       _processImage(File(pickedFile.path));
     }
   }
 
+  // 영수증 이미지 사진 찍기
   Future<void> _takePhoto() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
-        _points.clear(); // 그림판 초기화
+        _points.clear();
       });
       _processImage(File(pickedFile.path));
     }
   }
 
+  // 영수증 분석
   Future<void> _processImage(File image) async {
     final inputImage = InputImage.fromFile(image);
     final textRecognizer = GoogleMlKit.vision.textRecognizer();
@@ -87,6 +93,7 @@ class _ReceiptState extends State<Receipt> {
       }
     }
 
+    // 읽어들인 가격들 중 천원 이상인 것만 저장
     String? validAmount;
     for (var amount in extractedAmounts) {
       final totalAmount = double.tryParse(amount.replaceAll(',', '').replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
@@ -98,17 +105,14 @@ class _ReceiptState extends State<Receipt> {
     }
 
     setState(() {
-      if (validAmount != null) {
-        _totalAmount = validAmount;
-      } else {
-        _totalAmount = null;
-      }
+      _totalAmount = validAmount;
       text = recognizedText.text;
     });
 
     textRecognizer.close();
   }
 
+  // 정산 인원 조정을 위한 버튼
   void _increasePeople() {
     setState(() {
       peopleCount++;
@@ -123,19 +127,51 @@ class _ReceiptState extends State<Receipt> {
     }
   }
 
+  // 그림 전체 삭제
   void _clearDrawing() {
     setState(() {
       _points.clear();
     });
   }
 
+  // 그림 그린 이미지 저장
   Future<ui.Image?> _captureCanvas() async {
     RenderRepaintBoundary boundary =
     _canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
-    return image;
+    return await boundary.toImage(pixelRatio: 2.0);
   }
 
+  Future<void> _saveDataToFirebase(String formattedAmount, ui.Image? capturedImage) async {
+    // try {
+      String? imageUrl;
+
+      // 이미지 저장
+      if (capturedImage != null) {
+        final byteData = await capturedImage.toByteData(format: ui.ImageByteFormat.png);
+        final Uint8List imageData = byteData!.buffer.asUint8List();
+
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('receipts/${DateTime.now().millisecondsSinceEpoch}.png');
+        await storageRef.putData(imageData);
+        imageUrl = await storageRef.getDownloadURL();
+      }
+
+      // 데이터 저장
+      await FirebaseFirestore.instance.collection('receipts').add({
+        'totalAmount': _totalAmount,
+        'peopleCount': peopleCount,
+        'perPersonAmount': formattedAmount,
+        'imageUrl': imageUrl,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+    // } catch (e) {
+    //   print('Error saving data: $e');
+    // }
+  }
+
+  // 선택한 이미지 화면에 보여주는 부분
   Widget _buildImageCanvas() {
     return _image == null
         ? const Center(child: Text("이미지를 선택하세요."))
@@ -144,25 +180,29 @@ class _ReceiptState extends State<Receipt> {
       child: Stack(
         children: [
           Center(
-            child: GestureDetector(
-              onScaleUpdate: (details) {
-                setState(() {
-                  _scale = details.scale;
-                });
-              },
-              onTap: () {
-                setState(() {
-                  _isZoomed = !_isZoomed;
-                  _scale = _isZoomed ? 2.0 : 1.0; // 확대/축소 상태에 따라 scale 변경
-                });
-              },
-              child: Transform.scale(
-                scale: _scale,
-                child: Image.file(_image!),
-              ),
+            child: Transform.scale(
+              scale: _scale,
+              child: Image.file(_image!),
             ),
           ),
+          // Positioned(
+          //   top: 10,
+          //   right: 10,
+          //   child: IconButton(
+          //     icon: Icon(_isZoomed ? Icons.zoom_out : Icons.zoom_in),
+          //     color: Colors.white,
+          //     onPressed: () {
+          //       setState(() {
+          //         _isZoomed = !_isZoomed;
+          //         _scale = _isZoomed ? 2.0 : 1.0;
+          //       });
+          //     },
+          //   ),
+          // ),
+
+          // 펜 기능
           GestureDetector(
+            // 그리기 시작
             onPanUpdate: (details) {
               setState(() {
                 RenderBox box = context.findRenderObject() as RenderBox;
@@ -170,13 +210,14 @@ class _ReceiptState extends State<Receipt> {
                 _points.add(point);
               });
             },
+            // 그리기 끝
             onPanEnd: (details) {
               setState(() {
                 _points.add(null);
               });
             },
             child: CustomPaint(
-              painter: _SignaturePainter(_points),
+              painter: _Painter(_points),
               size: Size.infinite,
             ),
           ),
@@ -198,7 +239,7 @@ class _ReceiptState extends State<Receipt> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text('펜을 사용해 개인 정보를 지워주세요', style: TextStyle(fontSize: 18)),
-                TextButton(onPressed: _clearDrawing, child: Text('삭제')),
+                TextButton(onPressed: _clearDrawing, child: Text('전체 삭제')),
               ],
             ),
             Row(
@@ -231,6 +272,7 @@ class _ReceiptState extends State<Receipt> {
                   final formatter = NumberFormat('#,###');
                   final formattedAmount = formatter.format(perPerson);
 
+                  // 모달
                   showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
@@ -245,17 +287,23 @@ class _ReceiptState extends State<Receipt> {
                               child: RawImage(image: capturedImage),
                             ),
                           Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20)),
+                          Text('정산할 인원 $peopleCount 명', style: TextStyle(fontSize: 20)),
                           Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20)),
                         ],
                       ),
                       actions: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text('취소'),),
-                            TextButton(onPressed: () => Navigator.of(ctx).popAndPushNamed('/chatting'), child: Text('확인'),),
-                          ],
-                        )
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: Text('닫기'),
+                        ),
+                        TextButton(
+                          onPressed:() async {
+                            await _saveDataToFirebase(
+                                formattedAmount, capturedImage);
+                            Navigator.of(ctx).pushReplacementNamed('/chatting');
+                          },
+                          child: Text('확인'),
+                          ),
                       ],
                     ),
                   );
@@ -269,4 +317,3 @@ class _ReceiptState extends State<Receipt> {
     );
   }
 }
-

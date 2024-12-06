@@ -21,6 +21,7 @@ class _AddPageState extends State<AddPage> {
   final TextEditingController currentpeopleCountController = TextEditingController(text: "1");
   final TextEditingController destinationController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class _AddPageState extends State<AddPage> {
         'add position : ${geoProvider.selectedLatitude} ${geoProvider.selectedLongitude}');
 
     return Scaffold(
-      appBar: AppBar(title: Text("Add")),
+      appBar: AppBar(title: Text("팟빵 굽기")),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -214,7 +215,7 @@ class _AddPageState extends State<AddPage> {
         child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
       ),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTimeField("마감일을 선택하세요.", timeController),
+      _buildDateField("마감일을 선택하세요.", dateController),
       Text("인원", style: _fieldTitleStyle),
       _buildTextField("인원수를 입력하세요.", peopleCountController),
       Text("추가 사항", style: _fieldTitleStyle),
@@ -232,7 +233,7 @@ class _AddPageState extends State<AddPage> {
         child: Text("더 자세하게 알려주세요.", style: _fieldTitleStyle),
       ),
       Text("마감일", style: _fieldTitleStyle),
-      _buildTimeField("마감일을 선택하세요.", timeController),
+      _buildDateField("마감일을 선택하세요.", dateController),
       Text("장소", style: _fieldTitleStyle),
       Row(
         children: [
@@ -312,6 +313,43 @@ class _AddPageState extends State<AddPage> {
     );
   }
 
+  Widget _buildDateField(String hint, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+              ),
+              readOnly: true, // 입력 불가, Date Picker만 사용
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_today),
+            onPressed: () async {
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000), // 선택 가능한 시작 날짜
+                lastDate: DateTime(2100), // 선택 가능한 마지막 날짜
+              );
+              if (pickedDate != null) {
+                // Date Picker에서 선택한 날짜를 텍스트로 설정
+                controller.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+
   // 팝업 모달 표시
   void _showConfirmationModal() {
     Map<String, String> inputData = {};
@@ -342,7 +380,7 @@ class _AddPageState extends State<AddPage> {
     } else if (selectedCategory == "공구팟빵") {
       inputData = {
         '제품명': nameController.text,
-        '마감일': timeController.text,
+        '마감일': dateController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
         ? "1"
@@ -352,7 +390,7 @@ class _AddPageState extends State<AddPage> {
     } else if (selectedCategory == "기타팟빵") {
       inputData = {
         '이름': nameController.text,
-        '마감일': timeController.text,
+        '마감일': dateController.text,
         '장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
@@ -458,6 +496,7 @@ class _AddPageState extends State<AddPage> {
     pickupTimeController.clear();
     destinationController.clear();
     timeController.clear();
+    dateController.clear();
     currentpeopleCountController.text = "1";
   }
 
