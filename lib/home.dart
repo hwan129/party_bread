@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
                     'category': data['category'],
                     'pickMeUp': data['data']['탑승 장소'],
                     'destination': data['data']['목적지'],
-                    'time': data['data']['탑승 시간'],
+                    'deadline': data['data']['탑승 시간'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
@@ -157,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                     'category': data['category'],
                     'name': data['data']['음식 이름'],
                     'orderTime': data['data']['주문 시간'],
-                    'pickupTime': data['data']['픽업 시간'],
+                    'deadline': data['data']['픽업 시간'],
                     'pickupArea': data['data']['픽업 위치'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text("탑승 시간: ${bread['time'] ?? '정보 없음'}"),
+                  Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}"),
                 ] else ...[
                   Text(
                     bread['name'] ?? '제목 없음',
@@ -337,7 +337,7 @@ class _HomePageState extends State<HomePage> {
   Widget _listTileBuild(Map<String, dynamic> bread) {
     print('list bread : ${bread}');
     return Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: InkWell(
           onTap: () => showBreadDetails(bread),
           child: Container(
@@ -354,18 +354,35 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               child: ListTile(
-                title: Text(
-                  bread['category'] == '택시팟빵'
-                      ? "${bread['pickMeUp']} => ${bread['destination']}"
-                      : bread['name'],
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF574142),
-                  ),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bread['category'] == '택시팟빵'
+                          ? "${bread['pickMeUp']} -> ${bread['destination']}"
+                          : '${bread['name']}',
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF574142),
+                      ),
+                    ),
+                  ],
                 ),
-                subtitle: Text(
-                    "${bread['currentpeopleCount']} / ${bread['peopleCount']}"),
+                subtitle: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  // mainAxisAlignment: ,
+                  children: [
+                    Text(
+                      "${bread['category']}  |  ${bread['currentpeopleCount']} / ${bread['peopleCount']}  |  ${bread['deadline']}",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF574142),
+                      ),
+                    ),
+                  ],
+                ),
                 trailing: Icon(Icons.arrow_forward),
                 onTap: () => {showBreadDetails(bread)},
               )),
