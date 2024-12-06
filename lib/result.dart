@@ -114,6 +114,7 @@ class _ResultPageState extends State<ResultPage> {
               'destination': data['data']['목적지'], // 수정된 변수명
               'time': data['data']['탑승 시간'], // 수정된 변수명
               'peopleCount': data['data']['인원 수'], // 수정된 변수명
+              'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
               'detail': data['data']['추가 사항'], // 수정된 변수명
             };
           }
@@ -125,6 +126,7 @@ class _ResultPageState extends State<ResultPage> {
                   'orderTime': data['data']['주문 시간'], // 수정된 변수명
                   'pickupTime': data['data']['픽업 시간'], // 수정된 변수명
                   'peopleCount': data['data']['인원 수'], // 수정된 변수명
+                  'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
                   'detail': data['data']['추가 사항'], // 수정된 변수명
                 };
               }
@@ -191,6 +193,11 @@ class _ResultPageState extends State<ResultPage> {
                   Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}"),
                 ],
                 SizedBox(height: 10),
+                
+                Text(
+                  "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
+                ),
+                SizedBox(height: 10),
                 Text("세부사항: ${bread['detail'] ?? '없음'}"),
                 Spacer(),
                 Center(
@@ -210,20 +217,46 @@ class _ResultPageState extends State<ResultPage> {
                           final interactedDocs = List<String>.from(
                               userSnapshot.data()?['interactedDocs'] ?? []);
 
-                          // 문서 ID가 없으면 추가
-                          if (!interactedDocs.contains(bread['docId'])) {
-                            await userDoc.update({
-                              'interactedDocs': FieldValue.arrayUnion(
-                                  [bread['docId']]) // 문서 ID 추가
-                            });
-                          }
+                          // Firestore에서 해당 bread 문서 가져오기
+                          final breadDoc = FirebaseFirestore.instance
+                              .collection('bread')
+                              .doc(bread['docId']);
+                          final breadSnapshot = await breadDoc.get();
 
-                          // 채팅 화면으로 이동
-                          Navigator.pushNamed(
-                            context,
-                            '/chatting',
-                            arguments: {'roomId': bread['category']},
-                          );
+                          // 현재 인원 수와 최대 인원 수 가져오기
+                          final dynamic currentPeopleCountRaw =
+                              breadSnapshot.data()?['data']['현재 인원 수'] ?? 0;
+                          final dynamic peopleCountRaw =
+                              breadSnapshot.data()?['data']['인원 수'] ?? 0;
+
+                          final int currentPeopleCount = int.tryParse(currentPeopleCountRaw.toString()) ?? 0;
+                          final int peopleCount = int.tryParse(peopleCountRaw.toString()) ?? 0;
+
+                          if (currentPeopleCount < peopleCount) {
+                            // interactedDocs에 문서 ID가 없으면 추가
+                            if (!interactedDocs.contains(bread['docId'])) {
+                              await userDoc.update({
+                                'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                              });
+
+                              // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
+                              await breadDoc.update({
+                                'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
+                              });
+                            }
+
+                            // 채팅 화면으로 이동
+                            Navigator.pushNamed(
+                              context,
+                              '/chatting',
+                              arguments: {'roomId': bread['category']},
+                            );
+                          } else {
+                            // 인원이 다 찼을 경우 알림 출력
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('인원이 다 찼습니다!')),
+                            );
+                          }
                         }
                       } catch (e) {
                         print('문서 업데이트 중 오류 발생: $e');
