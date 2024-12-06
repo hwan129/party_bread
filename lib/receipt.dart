@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 
 class Receipt extends StatefulWidget {
@@ -9,44 +11,72 @@ class Receipt extends StatefulWidget {
   _ReceiptState createState() => _ReceiptState();
 }
 
+class _SignaturePainter extends CustomPainter {
+  final List<Offset?> points;
+
+  _SignaturePainter(this.points);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = Colors.black.withOpacity(0.7)
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 8.0;
+
+    for (int i = 0; i < points.length - 1; i++) {
+      if (points[i] != null && points[i + 1] != null) {
+        canvas.drawLine(points[i]!, points[i + 1]!, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SignaturePainter oldDelegate) => true;
+}
+
 class _ReceiptState extends State<Receipt> {
   File? _image;
   String? _totalAmount;
   String text = "";
-  final _peopleController = TextEditingController();
   final picker = ImagePicker();
 
-  // 갤러리 뒤지기
+  List<Offset?> _points = [];
+  GlobalKey _canvasKey = GlobalKey();
+  bool _isZoomed = false;
+  double _scale = 1.0;
+
+  int peopleCount = 1;
+
   Future<void> _gallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
+        _points.clear(); // 그림판 초기화
       });
       _processImage(File(pickedFile.path));
     }
   }
 
-  // 사진 찰칵
   Future<void> _takePhoto() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
+        _points.clear(); // 그림판 초기화
       });
       _processImage(File(pickedFile.path));
     }
   }
 
-  // 이미지 분석
   Future<void> _processImage(File image) async {
     final inputImage = InputImage.fromFile(image);
     final textRecognizer = GoogleMlKit.vision.textRecognizer();
     final recognizedText = await textRecognizer.processImage(inputImage);
 
-    List<String> extractedAmounts = []; // 추출한 텍스트 저장소
+    List<String> extractedAmounts = [];
     RegExp regExp = RegExp(r'(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)');
 
     for (var block in recognizedText.blocks) {
@@ -57,7 +87,6 @@ class _ReceiptState extends State<Receipt> {
       }
     }
 
-    // 천원 이상의 금액을 찾은 경우에만 저장
     String? validAmount;
     for (var amount in extractedAmounts) {
       final totalAmount = double.tryParse(amount.replaceAll(',', '').replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
@@ -80,39 +109,80 @@ class _ReceiptState extends State<Receipt> {
     textRecognizer.close();
   }
 
-  @override
-  void dispose() {
-    _peopleController.dispose();
-    super.dispose();
-  }
-
-  // 그림판
-  Widget _buildImageCanvas() {
-    return _image == null
-        ? const Center(child: Text("이미지를 선택하세요."))
-        : GestureDetector(
-      onPanUpdate: (details) {
-        // 그림판 기능 구현 필요 시 추가
-      },
-      child: Image.file(_image!),
-    );
-  }
-
-  // 정산 인원 설정하는 버튼 기능
-  int peopleCount = 1;
-
-  void _increasePeople() { // 플러스 버튼
+  void _increasePeople() {
     setState(() {
       peopleCount++;
     });
   }
 
-  void _decreasePeople() { // 마이너스
+  void _decreasePeople() {
     if (peopleCount > 1) {
       setState(() {
         peopleCount--;
       });
     }
+  }
+
+  void _clearDrawing() {
+    setState(() {
+      _points.clear();
+    });
+  }
+
+  Future<ui.Image?> _captureCanvas() async {
+    RenderRepaintBoundary boundary =
+    _canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+    return image;
+  }
+
+  Widget _buildImageCanvas() {
+    return _image == null
+        ? const Center(child: Text("이미지를 선택하세요."))
+        : RepaintBoundary(
+      key: _canvasKey,
+      child: Stack(
+        children: [
+          Center(
+            child: GestureDetector(
+              onScaleUpdate: (details) {
+                setState(() {
+                  _scale = details.scale;
+                });
+              },
+              onTap: () {
+                setState(() {
+                  _isZoomed = !_isZoomed;
+                  _scale = _isZoomed ? 2.0 : 1.0; // 확대/축소 상태에 따라 scale 변경
+                });
+              },
+              child: Transform.scale(
+                scale: _scale,
+                child: Image.file(_image!),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                RenderBox box = context.findRenderObject() as RenderBox;
+                Offset point = box.globalToLocal(details.localPosition);
+                _points.add(point);
+              });
+            },
+            onPanEnd: (details) {
+              setState(() {
+                _points.add(null);
+              });
+            },
+            child: CustomPaint(
+              painter: _SignaturePainter(_points),
+              size: Size.infinite,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -124,7 +194,13 @@ class _ReceiptState extends State<Receipt> {
         child: Column(
           children: [
             Expanded(child: _buildImageCanvas()),
-            // 영수증 사진 고르기 or 사진 찍기
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('펜을 사용해 개인 정보를 지워주세요', style: TextStyle(fontSize: 18)),
+                TextButton(onPressed: _clearDrawing, child: Text('삭제')),
+              ],
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -135,31 +211,23 @@ class _ReceiptState extends State<Receipt> {
             if (_totalAmount != null)
               Text('총 금액: $_totalAmount 원', style: TextStyle(fontSize: 24)),
             Text('정산할 인원', style: TextStyle(fontSize: 24)),
-            // 정산할 인원수 선택
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  onPressed: _decreasePeople,
-                  icon: Icon(Icons.remove),
-                ),
+                IconButton(onPressed: _decreasePeople, icon: Icon(Icons.remove)),
                 Text('$peopleCount 명', style: TextStyle(fontSize: 20)),
-                IconButton(
-                  onPressed: _increasePeople,
-                  icon: Icon(Icons.add),
-                ),
+                IconButton(onPressed: _increasePeople, icon: Icon(Icons.add)),
               ],
             ),
-            // 정산하기 버튼 -> 인당 얼마씩인지 + 영수증에 그림 그리기
             ElevatedButton(
-              onPressed: () {
-                if (_totalAmount != null && _peopleController.text.isNotEmpty) {
+              onPressed: () async {
+                if (_totalAmount != null) {
+                  final ui.Image? capturedImage = await _captureCanvas();
                   final total = double.tryParse(
                       _totalAmount!.replaceAll(RegExp(r'[^\d.]'), '')) ??
                       0;
-                  final perPerson = (total / peopleCount);
+                  final perPerson = total / peopleCount;
 
-                  // 정산한 금액 천 단위로 콤마 찍어주기
                   final formatter = NumberFormat('#,###');
                   final formattedAmount = formatter.format(perPerson);
 
@@ -167,15 +235,27 @@ class _ReceiptState extends State<Receipt> {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text('정산 결과'),
-                      content: Text(
-                        '1인당 $formattedAmount 원',
-                        style: TextStyle(fontSize: 18),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (capturedImage != null)
+                            SizedBox(
+                              width: 300,
+                              height: 300,
+                              child: RawImage(image: capturedImage),
+                            ),
+                          Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20)),
+                          Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20)),
+                        ],
                       ),
                       actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: Text('확인'),
-                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text('취소'),),
+                            TextButton(onPressed: () => Navigator.of(ctx).popAndPushNamed('/chatting'), child: Text('확인'),),
+                          ],
+                        )
                       ],
                     ),
                   );
@@ -189,3 +269,4 @@ class _ReceiptState extends State<Receipt> {
     );
   }
 }
+

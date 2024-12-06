@@ -145,24 +145,44 @@ class _HomePageState extends State<HomePage> {
                 if (data['categoryName'] == '택시팟빵') {
                   return {
                     'category': data['category'],
-                    'pickMeUp': data['data']['픽업 위치'],
+                    'pickMeUp': data['data']['탑승 장소'],
                     'destination': data['data']['목적지'],
                     'time': data['data']['탑승 시간'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
                   };
+                } else if (data['categoryName'] == '배달팟빵') {
+                  return {
+                    'category': data['category'],
+                    'name': data['data']['음식 이름'],
+                    'orderTime': data['data']['주문 시간'],
+                    'pickupTime': data['data']['픽업 시간'],
+                    'pickupArea': data['data']['픽업 위치'],
+                    'peopleCount': data['data']['인원 수'],
+                    'currentpeopleCount': data['data']['현재 인원 수'],
+                    'detail': data['data']['추가 사항'],
+                  };
+                } else if (data['categoryName'] == '공구팟빵') {
+                  return {
+                    'category': data['category'],
+                    'name': data['data']['제품명'],
+                    'deadline': data['data']['마감일'],
+                    'peopleCount': data['data']['인원 수'],
+                    'currentpeopleCount': data['data']['현재 인원 수'],
+                    'detail': data['data']['추가 사항'],
+                  };
+                } else if (data['categoryName'] == '기타팟빵') {
+                  return {
+                    'category': data['category'],
+                    'name': data['data']['이름'],
+                    'deadline': data['data']['마감일'],
+                    'area': data['data']['장소'],
+                    'peopleCount': data['data']['인원 수'],
+                    'currentpeopleCount': data['data']['현재 인원 수'],
+                    'detail': data['data']['추가 사항'],
+                  };
                 }
-
-                return {
-                  'category': data['category'],
-                  'name': data['data']['음식 이름'],
-                  'orderTime': data['data']['주문 시간'],
-                  'pickupTime': data['data']['픽업 시간'],
-                  'peopleCount': data['data']['인원 수'],
-                  'currentpeopleCount': data['data']['현재 인원 수'],
-                  'detail': data['data']['추가 사항'],
-                };
               }
             })
             .where((bread) => bread != null) // null 빼고 받아옴
@@ -312,6 +332,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _listTileBuild(Map<String, dynamic> bread, String title, maxPeople,
+      currentPeople, deadline) {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: InkWell(
+          onTap: () => showBreadDetails(bread),
+          child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white, // 배경색 설정
+                borderRadius: BorderRadius.circular(10), // 둥근 모서리 설정
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // 그림자 색
+                    spreadRadius: 2, // 그림자의 확장 범위
+                    blurRadius: 5, // 그림자의 흐림 정도
+                    offset: Offset(1, 1), // 그림자의 위치 (x, y 방향)
+                  ),
+                ],
+              ),
+              child: ListTile(
+                title: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF574142),
+                  ),
+                ),
+                subtitle: Text("${currentPeople} / ${maxPeople}"),
+                trailing: Icon(Icons.arrow_forward),
+                onTap: () => {showBreadDetails(bread)},
+              )),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -390,76 +445,43 @@ class _HomePageState extends State<HomePage> {
                                 "${bread['pickMeUp'] ?? '출발지 없음'} → ${bread['destination'] ?? '목적지 없음'}";
                             final subtitle = bread['detail'] ?? '세부 정보 없음';
 
-                            return Padding(
-                                padding: EdgeInsets.symmetric(vertical: 8),
-                                child: InkWell(
-                                  onTap: () => showBreadDetails(bread),
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white, // 배경색 설정
-                                        borderRadius: BorderRadius.circular(
-                                            10), // 둥근 모서리 설정
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black
-                                                .withOpacity(0.2), // 그림자 색
-                                            spreadRadius: 2, // 그림자의 확장 범위
-                                            blurRadius: 5, // 그림자의 흐림 정도
-                                            offset: Offset(
-                                                1, 1), // 그림자의 위치 (x, y 방향)
-                                          ),
-                                        ],
-                                      ),
-                                      child: ListTile(
-                                        title: Text(
-                                          title,
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF574142),
-                                          ),
-                                        ),
-                                        subtitle: Text(subtitle),
-                                        trailing: Icon(Icons.arrow_forward),
-                                        onTap: () => {showBreadDetails(bread)},
-                                      )),
-                                ));
+                            // _listTileBuild(bread, title, maxPeople,
+                            //     currentPeople, deadline);
+                            // return Padding(
+                            //     padding: EdgeInsets.symmetric(vertical: 8),
+                            //     child: InkWell(
+                            //       onTap: () => showBreadDetails(bread),
+                            //       child: Container(
+                            //           decoration: BoxDecoration(
+                            //             color: Colors.white, // 배경색 설정
+                            //             borderRadius: BorderRadius.circular(
+                            //                 10), // 둥근 모서리 설정
+                            //             boxShadow: [
+                            //               BoxShadow(
+                            //                 color: Colors.black
+                            //                     .withOpacity(0.2), // 그림자 색
+                            //                 spreadRadius: 2, // 그림자의 확장 범위
+                            //                 blurRadius: 5, // 그림자의 흐림 정도
+                            //                 offset: Offset(
+                            //                     1, 1), // 그림자의 위치 (x, y 방향)
+                            //               ),
+                            //             ],
+                            //           ),
+                            //           child: ListTile(
+                            //             title: Text(
+                            //               title,
+                            //               style: TextStyle(
+                            //                 fontSize: 20,
+                            //                 fontWeight: FontWeight.bold,
+                            //                 color: Color(0xFF574142),
+                            //               ),
+                            //             ),
+                            //             subtitle: Text(subtitle),
+                            //             trailing: Icon(Icons.arrow_forward),
+                            //             onTap: () => {showBreadDetails(bread)},
+                            //           )),
+                            //     ));
                           }
-                          return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                              child: InkWell(
-                                onTap: () => showBreadDetails(bread),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white, // 배경색 설정
-                                      borderRadius: BorderRadius.circular(
-                                          10), // 둥근 모서리 설정
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black
-                                              .withOpacity(0.2), // 그림자 색
-                                          spreadRadius: 2, // 그림자의 확장 범위
-                                          blurRadius: 5, // 그림자의 흐림 정도
-                                          offset:
-                                              Offset(1, 1), // 그림자의 위치 (x, y 방향)
-                                        ),
-                                      ],
-                                    ),
-                                    child: ListTile(
-                                      title: Text(
-                                        bread['name'] ?? '이름 없음',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF574142),
-                                        ),
-                                      ),
-                                      subtitle:
-                                          Text(bread['detail'] ?? '상세 정보 없음'),
-                                      // trailing: Icon(Icons.arrow_forward),
-                                      onTap: () => {showBreadDetails(bread)},
-                                    )),
-                              ));
                         },
                       ),
                     )
