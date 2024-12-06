@@ -64,51 +64,70 @@ class _SignInEmailPageState extends State<SignInEmailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign in with Email')),
+      appBar: AppBar(title: Text('이메일로 로그인')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text("이메일", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+              SizedBox(height: 10),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  hintText: '이메일을 입력하세요',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                    borderRadius: BorderRadius.circular(10),
+
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 16),
+              Text("비밀번호", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+              SizedBox(height: 10),
               TextField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  hintText: '비밀번호를 입력하세요',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 obscureText: true,
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 50),
               ElevatedButton(
                 onPressed: _signInWithEmailAndPassword,
-                child: Text('Complete Sign In'),
+                child: Text('로그인 하기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF574142),
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(double.infinity, 50),
+                  foregroundColor: Color(0xFFF5E0D3),
+                  minimumSize: Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
