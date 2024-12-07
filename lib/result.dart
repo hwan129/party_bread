@@ -464,7 +464,15 @@ class _ResultPageState extends State<ResultPage> {
                         );
                       }
                     },
-                    child: Text('팟빵 함께 먹기'),
+                    child: Text('팟빵 함께 먹기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF574142),
+                      foregroundColor: Color(0xFFF5E0D3),
+                      minimumSize: Size(double.infinity, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ),
               ],
