@@ -101,7 +101,9 @@ class _ReceiptState extends State<Receipt> {
     // 읽어들인 가격들 중 천원 이상인 것만 저장
     String? validAmount;
     for (var amount in extractedAmounts) {
-      final totalAmount = double.tryParse(amount.replaceAll(',', '').replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
+      final totalAmount = double.tryParse(
+              amount.replaceAll(',', '').replaceAll(RegExp(r'[^\d.]'), '')) ??
+          0;
 
       if (totalAmount >= 1000) {
         validAmount = amount;
@@ -142,17 +144,19 @@ class _ReceiptState extends State<Receipt> {
   // 그림 그린 이미지 저장
   Future<ui.Image?> _captureCanvas() async {
     RenderRepaintBoundary boundary =
-    _canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+        _canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
     return await boundary.toImage(pixelRatio: 2.0);
   }
 
-  Future<void> _saveDataToFirebase(String formattedAmount, ui.Image? capturedImage) async {
+  Future<void> _saveDataToFirebase(
+      String formattedAmount, ui.Image? capturedImage) async {
     // try {
     String? imageUrl;
 
     // 이미지 저장
     if (capturedImage != null) {
-      final byteData = await capturedImage.toByteData(format: ui.ImageByteFormat.png);
+      final byteData =
+          await capturedImage.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List imageData = byteData!.buffer.asUint8List();
 
       final storageRef = FirebaseStorage.instance
@@ -177,12 +181,13 @@ class _ReceiptState extends State<Receipt> {
     // }
   }
 
-
-  Future<void> _sendReceiptMessage(String formattedAmount, String? imageUrl) async {
+  Future<void> _sendReceiptMessage(
+      String formattedAmount, String? imageUrl) async {
     final message = {
       'uid': FirebaseAuth.instance.currentUser?.uid,
       'nickname': '엔빵이',
-      'message': '영수증 분석 결과\n총 금액 $_totalAmount 원\n총 $peopleCount 명\n인당 $formattedAmount 원',
+      'message':
+          '영수증 분석 결과\n총 금액 $_totalAmount 원\n총 $peopleCount 명\n인당 $formattedAmount 원',
       'imageUrl': imageUrl,
       'timestamp': FieldValue.serverTimestamp(),
     };
@@ -192,50 +197,52 @@ class _ReceiptState extends State<Receipt> {
         .doc(widget.roomId)
         .collection('messages')
         .add(message);
-
-
   }
 
   // 선택한 이미지 화면에 보여주는 부분
   Widget _buildImageCanvas() {
     return _image == null
-        ? const Center(child: Text("이미지를 선택해주세요.", style: TextStyle(fontSize: 20),))
+        ? const Center(
+            child: Text(
+            "이미지를 선택해주세요.",
+            style: TextStyle(fontSize: 20),
+          ))
         : RepaintBoundary(
-      key: _canvasKey,
-      child: Stack(
-        children: [
-          Center(
-            child: Transform.scale(
-              scale: _scale,
-              child: Image.file(_image!),
-            ),
-          ),
+            key: _canvasKey,
+            child: Stack(
+              children: [
+                Center(
+                  child: Transform.scale(
+                    scale: _scale,
+                    child: Image.file(_image!),
+                  ),
+                ),
 
-          // 이미지가 선택되었을 때만 펜 기능을 사용
-          if (_image != null)
-            GestureDetector(
-              // 그리기 시작
-              onPanUpdate: (details) {
-                setState(() {
-                  RenderBox box = context.findRenderObject() as RenderBox;
-                  Offset point = box.globalToLocal(details.localPosition);
-                  _points.add(point);
-                });
-              },
-              // 그리기 끝
-              onPanEnd: (details) {
-                setState(() {
-                  _points.add(null);
-                });
-              },
-              child: CustomPaint(
-                painter: _Painter(_points),
-                size: Size.infinite,
-              ),
+                // 이미지가 선택되었을 때만 펜 기능을 사용
+                if (_image != null)
+                  GestureDetector(
+                    // 그리기 시작
+                    onPanUpdate: (details) {
+                      setState(() {
+                        RenderBox box = context.findRenderObject() as RenderBox;
+                        Offset point = box.globalToLocal(details.localPosition);
+                        _points.add(point);
+                      });
+                    },
+                    // 그리기 끝
+                    onPanEnd: (details) {
+                      setState(() {
+                        _points.add(null);
+                      });
+                    },
+                    child: CustomPaint(
+                      painter: _Painter(_points),
+                      size: Size.infinite,
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
-    );
+          );
   }
 
   @override
@@ -246,7 +253,7 @@ class _ReceiptState extends State<Receipt> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            if(_image != null) ... [
+            if (_image != null) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -260,17 +267,24 @@ class _ReceiptState extends State<Receipt> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(onPressed: _gallery, icon: Icon(Icons.attach_file,)),
-                IconButton(onPressed: _takePhoto, icon: Icon(Icons.add_a_photo)),
+                IconButton(
+                    onPressed: _gallery,
+                    icon: Icon(
+                      Icons.attach_file,
+                    )),
+                IconButton(
+                    onPressed: _takePhoto, icon: Icon(Icons.add_a_photo)),
               ],
             ),
-            if (_totalAmount != null) ... [
+            if (_totalAmount != null) ...[
               SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('총 금액 ', style: TextStyle(fontSize: 23)),
-                  Text('$_totalAmount', style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
+                  Text('$_totalAmount',
+                      style:
+                          TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
                   Text(' 원', style: TextStyle(fontSize: 23)),
                 ],
               ),
@@ -278,8 +292,11 @@ class _ReceiptState extends State<Receipt> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('정산할 인원', style: TextStyle(fontSize: 23)),
-                  IconButton(onPressed: _decreasePeople, icon: Icon(Icons.remove)),
-                  Text('$peopleCount 명', style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
+                  IconButton(
+                      onPressed: _decreasePeople, icon: Icon(Icons.remove)),
+                  Text('$peopleCount 명',
+                      style:
+                          TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
                   IconButton(onPressed: _increasePeople, icon: Icon(Icons.add)),
                 ],
               ),
@@ -296,7 +313,7 @@ class _ReceiptState extends State<Receipt> {
                   if (_totalAmount != null) {
                     final ui.Image? capturedImage = await _captureCanvas();
                     final total = double.tryParse(
-                        _totalAmount!.replaceAll(RegExp(r'[^\d.]'), '')) ??
+                            _totalAmount!.replaceAll(RegExp(r'[^\d.]'), '')) ??
                         0;
                     final perPerson = total / peopleCount;
 
@@ -307,8 +324,11 @@ class _ReceiptState extends State<Receipt> {
                     showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: Text('정산 결과', style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xFF574142))),
+                        title: Text('정산 결과',
+                            style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF574142))),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -319,11 +339,19 @@ class _ReceiptState extends State<Receipt> {
                                 child: RawImage(image: capturedImage),
                               ),
                             SizedBox(height: 10),
-                            Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), ),
+                            Text(
+                              '총 금액 $_totalAmount 원',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
                             SizedBox(height: 1),
-                            Text('정산할 인원 $peopleCount 명', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            Text('정산할 인원 $peopleCount 명',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold)),
                             SizedBox(height: 1),
-                            Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            Text('1인당 $formattedAmount 원',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         actions: [
@@ -331,15 +359,20 @@ class _ReceiptState extends State<Receipt> {
                             children: [
                               TextButton(
                                 onPressed: () => Navigator.of(ctx).pop(),
-                                child: Text('취소',
+                                child: Text(
+                                  '취소',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                  ),),
+                                  ),
+                                ),
                                 style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(Color(0xFFF5E0D3)),
-                                  foregroundColor: MaterialStateProperty.all(Color(0xFF574142)),
-                                  minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+                                  backgroundColor: MaterialStateProperty.all(
+                                      Color(0xFFF5E0D3)),
+                                  foregroundColor: MaterialStateProperty.all(
+                                      Color(0xFF574142)),
+                                  minimumSize: MaterialStateProperty.all(
+                                      Size(double.infinity, 50)),
                                   shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
@@ -349,8 +382,9 @@ class _ReceiptState extends State<Receipt> {
                               ),
                               SizedBox(height: 8),
                               TextButton(
-                                onPressed:() async {
-                                  final docRef = await FirebaseFirestore.instance
+                                onPressed: () async {
+                                  final docRef = await FirebaseFirestore
+                                      .instance
                                       .collection('chatRooms')
                                       .doc(widget.roomId)
                                       .get();
@@ -358,17 +392,25 @@ class _ReceiptState extends State<Receipt> {
 
                                   await _saveDataToFirebase(
                                       formattedAmount, capturedImage);
-                                  Navigator.of(ctx).pushReplacementNamed('/chatting', arguments: {'roomId': docId}, );
+                                  Navigator.of(ctx).pushReplacementNamed(
+                                    '/chatting',
+                                    arguments: {'roomId': docId},
+                                  );
                                 },
-                                child: Text('확인',
+                                child: Text(
+                                  '확인',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                  ),),
+                                  ),
+                                ),
                                 style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(Color(0xFF574142)),
-                                  foregroundColor: MaterialStateProperty.all(Color(0xFFF5E0D3)),
-                                  minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+                                  backgroundColor: MaterialStateProperty.all(
+                                      Color(0xFF574142)),
+                                  foregroundColor: MaterialStateProperty.all(
+                                      Color(0xFFF5E0D3)),
+                                  minimumSize: MaterialStateProperty.all(
+                                      Size(double.infinity, 50)),
                                   shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
@@ -383,7 +425,10 @@ class _ReceiptState extends State<Receipt> {
                     );
                   }
                 },
-                child: Text('정산하기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                child: Text(
+                  '정산하기',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ],
