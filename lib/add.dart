@@ -385,6 +385,7 @@ class _AddPageState extends State<AddPage> {
     } else if (selectedCategory == "공구팟빵") {
       inputData = {
         '제품명': nameController.text,
+        '마감 시간': timeController.text,
         '마감일': dateController.text,
         '인원 수': peopleCountController.text,
         '현재 인원 수': currentpeopleCountController.text.isEmpty
@@ -395,6 +396,7 @@ class _AddPageState extends State<AddPage> {
     } else if (selectedCategory == "기타팟빵") {
       inputData = {
         '이름': nameController.text,
+        '마감 시간': timeController.text,
         '마감일': dateController.text,
         '장소': pickMeUpController.text,
         '인원 수': peopleCountController.text,
