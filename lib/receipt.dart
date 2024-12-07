@@ -148,30 +148,30 @@ class _ReceiptState extends State<Receipt> {
 
   Future<void> _saveDataToFirebase(String formattedAmount, ui.Image? capturedImage) async {
     // try {
-      String? imageUrl;
+    String? imageUrl;
 
-      // 이미지 저장
-      if (capturedImage != null) {
-        final byteData = await capturedImage.toByteData(format: ui.ImageByteFormat.png);
-        final Uint8List imageData = byteData!.buffer.asUint8List();
+    // 이미지 저장
+    if (capturedImage != null) {
+      final byteData = await capturedImage.toByteData(format: ui.ImageByteFormat.png);
+      final Uint8List imageData = byteData!.buffer.asUint8List();
 
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('receipts/${DateTime.now().millisecondsSinceEpoch}.png');
-        await storageRef.putData(imageData);
-        imageUrl = await storageRef.getDownloadURL();
-      }
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('receipts/${DateTime.now().millisecondsSinceEpoch}.png');
+      await storageRef.putData(imageData);
+      imageUrl = await storageRef.getDownloadURL();
+    }
 
-      // 데이터 저장
-      await FirebaseFirestore.instance.collection('receipts').add({
-        'totalAmount': _totalAmount,
-        'peopleCount': peopleCount,
-        'perPersonAmount': formattedAmount,
-        'imageUrl': imageUrl,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+    // 데이터 저장
+    await FirebaseFirestore.instance.collection('receipts').add({
+      'totalAmount': _totalAmount,
+      'peopleCount': peopleCount,
+      'perPersonAmount': formattedAmount,
+      'imageUrl': imageUrl,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
 
-      _sendReceiptMessage(formattedAmount, imageUrl);
+    _sendReceiptMessage(formattedAmount, imageUrl);
     // } catch (e) {
     //   print('Error saving data: $e');
     // }
@@ -188,10 +188,12 @@ class _ReceiptState extends State<Receipt> {
     };
 
     await FirebaseFirestore.instance
-        .collection('chat_rooms')
+        .collection('chatRooms')
         .doc(widget.roomId)
         .collection('messages')
         .add(message);
+
+
   }
 
   // 선택한 이미지 화면에 보여주는 부분
@@ -263,6 +265,7 @@ class _ReceiptState extends State<Receipt> {
               ],
             ),
             if (_totalAmount != null) ... [
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -304,7 +307,8 @@ class _ReceiptState extends State<Receipt> {
                     showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: Text('정산 결과'),
+                        title: Text('정산 결과', style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xFF574142))),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -314,24 +318,66 @@ class _ReceiptState extends State<Receipt> {
                                 height: 300,
                                 child: RawImage(image: capturedImage),
                               ),
-                            Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20)),
-                            Text('정산할 인원 $peopleCount 명', style: TextStyle(fontSize: 20)),
-                            Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20)),
+                            SizedBox(height: 10),
+                            Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), ),
+                            SizedBox(height: 1),
+                            Text('정산할 인원 $peopleCount 명', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            SizedBox(height: 1),
+                            Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: Text('취소'),
+                          Column(
+                            children: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: Text('취소',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),),
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Color(0xFFF5E0D3)),
+                                  foregroundColor: MaterialStateProperty.all(Color(0xFF574142)),
+                                  minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+                                  shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              TextButton(
+                                onPressed:() async {
+                                  final docRef = await FirebaseFirestore.instance
+                                      .collection('chatRooms')
+                                      .doc(widget.roomId)
+                                      .get();
+                                  final docId = docRef.id;
+
+                                  await _saveDataToFirebase(
+                                      formattedAmount, capturedImage);
+                                  Navigator.of(ctx).pushReplacementNamed('/chatting', arguments: {'roomId': docId}, );
+                                },
+                                child: Text('확인',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),),
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Color(0xFF574142)),
+                                  foregroundColor: MaterialStateProperty.all(Color(0xFFF5E0D3)),
+                                  minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+                                  shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          TextButton(
-                            onPressed:() async {
-                              await _saveDataToFirebase(
-                                  formattedAmount, capturedImage);
-                              Navigator.of(ctx).pushReplacementNamed('/chatting');
-                            },
-                            child: Text('확인'),
-                            ),
                         ],
                       ),
                     );
