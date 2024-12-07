@@ -137,28 +137,37 @@ class _HomePageState extends State<HomePage> {
                   final DateTime now = DateTime.now();
                   // print("현재 시간: $now");
 
-                  // 시간 문자열을 24시간 형식으로 변환
-                  final DateTime itemTime =
-                      DateFormat('hh:mm a', 'en_US').parse(timeText);
-                  // final String formattedTime =
-                  //     DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
-                  // print("픽업 시간 (24시간 형식): $formattedTime");
+                  if (data['category'] == '배달팟빵' ||
+                      data['category'] == '택시팟빵') {
+                    // 시간 문자열을 24시간 형식으로 변환
+                    final DateTime itemTime =
+                        DateFormat('hh:mm a', 'en_US').parse(timeText);
 
-                  // 현재 날짜에 변환된 시간 적용
-                  final DateTime itemDateTime = DateTime(
-                    now.year,
-                    now.month,
-                    now.day,
-                    itemTime.hour,
-                    itemTime.minute,
-                  );
+                    // 현재 날짜에 변환된 시간 적용
+                    final DateTime itemDateTime = DateTime(
+                      now.year,
+                      now.month,
+                      now.day,
+                      itemTime.hour,
+                      itemTime.minute,
+                    );
+                    // 변환된 시간과 현재 시간 비교
+                    print("현재 날짜에 맞춘 시간: $itemDateTime");
+                    if (itemDateTime.isBefore(now)) {
+                      print("입력된 시간이 이미 지났습니다.");
+                      return null;
+                    }
+                  } else {
+                    final String deadlineString =
+                        '${data['data']['마감일']} ${data['data']['마감 시간']}';
+                    final DateFormat inputFormat =
+                        DateFormat('yyyy-MM-dd h:mm a');
+                    final DateTime deadline = inputFormat.parse(deadlineString);
 
-                  print("현재 날짜에 맞춘 시간: $itemDateTime");
-
-                  // 변환된 시간과 현재 시간 비교
-                  if (itemDateTime.isBefore(now)) {
-                    print("입력된 시간이 이미 지났습니다.");
-                    return null;
+                    if (deadline.isBefore(now)) {
+                      print("입력된 시간이 이미 지났습니다.");
+                      return null;
+                    }
                   }
                 } catch (e) {
                   print("시간 변환 중 오류 발생: $e");
@@ -197,7 +206,8 @@ class _HomePageState extends State<HomePage> {
                     'docId': doc.id,
                     'category': data['category'],
                     'name': data['data']['제품명'],
-                    'deadline': data['data']['마감일'],
+                    'deadline_time': data['data']['마감 시간'],
+                    'deadline_date': data['data']['마감일'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
@@ -208,7 +218,8 @@ class _HomePageState extends State<HomePage> {
                     'docId': doc.id,
                     'category': data['category'],
                     'name': data['data']['이름'],
-                    'deadline': data['data']['마감일'],
+                    'deadline_time': data['data']['마감 시간'],
+                    'deadline_date': data['data']['마감일'],
                     'meetArea': data['data']['장소'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
