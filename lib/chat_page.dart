@@ -18,7 +18,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
         'name': roomName, // 채팅방 이름
         'createdAt': FieldValue.serverTimestamp(), // 생성 시간
       };
-      final newRoomRef = await _firestore.collection('chat_rooms').add(newRoom);
+      final newRoomRef = await _firestore.collection('chatRooms').add(newRoom);
 
       // 생성된 채팅방으로 이동
       Navigator.push(
@@ -41,7 +41,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
-                  .collection('chat_rooms')
+                  .collection('chatRooms')
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -219,7 +219,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     };
 
     await _firestore
-        .collection('chat_rooms')
+        .collection('chatRooms')
         .doc(widget.roomId)
         .collection('messages')
         .add(message);
@@ -239,7 +239,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
-                  .collection('chat_rooms')
+                  .collection('chatRooms')
                   .doc(widget.roomId)
                   .collection('messages')
                   .orderBy('timestamp', descending: false)
