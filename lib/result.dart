@@ -138,6 +138,7 @@ class _ResultPageState extends State<ResultPage> {
                     'docId': doc.id,
                     'category': data['category'],
                     'name': data['data']['제품명'],
+                    'deadline_time': data['data']['마감 시간'],
                     'deadline': data['data']['마감일'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
@@ -149,6 +150,7 @@ class _ResultPageState extends State<ResultPage> {
                     'docId': doc.id,
                     'category': data['category'],
                     'name': data['data']['이름'],
+                    'deadline_time': data['data']['마감 시간'],
                     'deadline': data['data']['마감일'],
                     'meetArea': data['data']['장소'],
                     'peopleCount': data['data']['인원 수'],
@@ -293,7 +295,8 @@ class _ResultPageState extends State<ResultPage> {
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                         TextSpan(
-                            text: "${bread['deadline']}",
+                            text:
+                                "${bread['deadline']}, ${bread['deadline_time']}",
                             style: TextStyle(fontSize: 20)),
                       ],
                     ),

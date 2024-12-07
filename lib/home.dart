@@ -200,7 +200,7 @@ class _HomePageState extends State<HomePage> {
                     'category': data['category'],
                     'name': data['data']['제품명'],
                     'deadline_time': data['data']['마감 시간'],
-                    'deadline_date': data['data']['마감일'],
+                    'deadline': data['data']['마감일'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
                     'detail': data['data']['추가 사항'],
@@ -212,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                     'category': data['category'],
                     'name': data['data']['이름'],
                     'deadline_time': data['data']['마감 시간'],
-                    'deadline_date': data['data']['마감일'],
+                    'deadline': data['data']['마감일'],
                     'meetArea': data['data']['장소'],
                     'peopleCount': data['data']['인원 수'],
                     'currentpeopleCount': data['data']['현재 인원 수'],
@@ -356,7 +356,8 @@ class _HomePageState extends State<HomePage> {
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                         TextSpan(
-                            text: "${bread['deadline']}'",
+                            text:
+                                "${bread['deadline']}, ${bread['deadline_time']}",
                             style: TextStyle(fontSize: 20)),
                       ],
                     ),
@@ -555,13 +556,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _listTileBuild(Map<String, dynamic> bread) {
-    // print('list bread : ${bread}');
+    print('list bread : ${bread}');
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: InkWell(
           onTap: () => showBreadDetails(bread),
           child: Container(
-              height: 85,
               decoration: BoxDecoration(
                 color: Colors.white, // 배경색 설정
                 borderRadius: BorderRadius.circular(10), // 둥근 모서리 설정
@@ -578,18 +578,22 @@ class _HomePageState extends State<HomePage> {
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 3),
                     Text(
                       bread['category'] == '택시팟빵'
                           ? "${bread['meetArea']} -> ${bread['destination']}"
                           : '${bread['name']}',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF574142),
                       ),
                     ),
-                    // SizedBox(height: 2),
+                  ],
+                ),
+                subtitle: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  // mainAxisAlignment: ,
+                  children: [
                     Text(
                       "${bread['category']}  |  ${bread['currentpeopleCount']} / ${bread['peopleCount']}  |  ${bread['deadline']}",
                       style: TextStyle(
