@@ -475,6 +475,7 @@ class _HomePageState extends State<HomePage> {
                               .collection('user')
                               .doc(user.uid);
 
+
                           // 유저의 interactedDocs 배열에 해당 문서 ID가 존재하는지 확인
                           final userSnapshot = await userDoc.get();
                           final interactedDocs = List<String>.from(
@@ -546,7 +547,7 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
                     },
-                    child: Text('팟빵 함께 먹기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    child: Text('팟빵 함께 먹기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF574142),
                       foregroundColor: Color(0xFFF5E0D3),
@@ -675,7 +676,7 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: "hihi 님, 어떤 팟빵을 찾으세요?",
+                      hintText: "어떤 팟빵을 찾으세요?",
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
                       prefixIcon: Icon(Icons.search),
                       filled: true,
