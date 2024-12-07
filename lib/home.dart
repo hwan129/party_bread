@@ -455,6 +455,7 @@ class _HomePageState extends State<HomePage> {
                               .collection('user')
                               .doc(user.uid);
 
+
                           // 유저의 interactedDocs 배열에 해당 문서 ID가 존재하는지 확인
                           final userSnapshot = await userDoc.get();
                           final interactedDocs = List<String>.from(
