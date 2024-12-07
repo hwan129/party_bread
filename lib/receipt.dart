@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -11,6 +12,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
 
 class Receipt extends StatefulWidget {
+  final String roomId;
+
+  Receipt({required this.roomId});
+
   @override
   _ReceiptState createState() => _ReceiptState();
 }
@@ -166,15 +171,33 @@ class _ReceiptState extends State<Receipt> {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
+      _sendReceiptMessage(formattedAmount, imageUrl);
     // } catch (e) {
     //   print('Error saving data: $e');
     // }
   }
 
+
+  Future<void> _sendReceiptMessage(String formattedAmount, String? imageUrl) async {
+    final message = {
+      'uid': FirebaseAuth.instance.currentUser?.uid,
+      'nickname': '엔빵이',
+      'message': '영수증 분석 결과\n총 금액 $_totalAmount 원\n총 $peopleCount 명\n인당 $formattedAmount 원',
+      'imageUrl': imageUrl,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    await FirebaseFirestore.instance
+        .collection('chat_rooms')
+        .doc(widget.roomId)
+        .collection('messages')
+        .add(message);
+  }
+
   // 선택한 이미지 화면에 보여주는 부분
   Widget _buildImageCanvas() {
     return _image == null
-        ? const Center(child: Text("이미지를 선택하세요."))
+        ? const Center(child: Text("이미지를 선택해주세요.", style: TextStyle(fontSize: 20),))
         : RepaintBoundary(
       key: _canvasKey,
       child: Stack(
@@ -185,42 +208,29 @@ class _ReceiptState extends State<Receipt> {
               child: Image.file(_image!),
             ),
           ),
-          // Positioned(
-          //   top: 10,
-          //   right: 10,
-          //   child: IconButton(
-          //     icon: Icon(_isZoomed ? Icons.zoom_out : Icons.zoom_in),
-          //     color: Colors.white,
-          //     onPressed: () {
-          //       setState(() {
-          //         _isZoomed = !_isZoomed;
-          //         _scale = _isZoomed ? 2.0 : 1.0;
-          //       });
-          //     },
-          //   ),
-          // ),
 
-          // 펜 기능
-          GestureDetector(
-            // 그리기 시작
-            onPanUpdate: (details) {
-              setState(() {
-                RenderBox box = context.findRenderObject() as RenderBox;
-                Offset point = box.globalToLocal(details.localPosition);
-                _points.add(point);
-              });
-            },
-            // 그리기 끝
-            onPanEnd: (details) {
-              setState(() {
-                _points.add(null);
-              });
-            },
-            child: CustomPaint(
-              painter: _Painter(_points),
-              size: Size.infinite,
+          // 이미지가 선택되었을 때만 펜 기능을 사용
+          if (_image != null)
+            GestureDetector(
+              // 그리기 시작
+              onPanUpdate: (details) {
+                setState(() {
+                  RenderBox box = context.findRenderObject() as RenderBox;
+                  Offset point = box.globalToLocal(details.localPosition);
+                  _points.add(point);
+                });
+              },
+              // 그리기 끝
+              onPanEnd: (details) {
+                setState(() {
+                  _points.add(null);
+                });
+              },
+              child: CustomPaint(
+                painter: _Painter(_points),
+                size: Size.infinite,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -234,83 +244,102 @@ class _ReceiptState extends State<Receipt> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            if(_image != null) ... [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('펜을 사용해 개인 정보를 지워주세요', style: TextStyle(fontSize: 18)),
+                  TextButton(onPressed: _clearDrawing, child: Text('전체 삭제')),
+                ],
+              ),
+            ],
+            SizedBox(height: 10),
             Expanded(child: _buildImageCanvas()),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text('펜을 사용해 개인 정보를 지워주세요', style: TextStyle(fontSize: 18)),
-                TextButton(onPressed: _clearDrawing, child: Text('전체 삭제')),
-              ],
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(onPressed: _gallery, icon: Icon(Icons.attach_file)),
+                IconButton(onPressed: _gallery, icon: Icon(Icons.attach_file,)),
                 IconButton(onPressed: _takePhoto, icon: Icon(Icons.add_a_photo)),
               ],
             ),
-            if (_totalAmount != null)
-              Text('총 금액: $_totalAmount 원', style: TextStyle(fontSize: 24)),
-            Text('정산할 인원', style: TextStyle(fontSize: 24)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(onPressed: _decreasePeople, icon: Icon(Icons.remove)),
-                Text('$peopleCount 명', style: TextStyle(fontSize: 20)),
-                IconButton(onPressed: _increasePeople, icon: Icon(Icons.add)),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_totalAmount != null) {
-                  final ui.Image? capturedImage = await _captureCanvas();
-                  final total = double.tryParse(
-                      _totalAmount!.replaceAll(RegExp(r'[^\d.]'), '')) ??
-                      0;
-                  final perPerson = total / peopleCount;
+            if (_totalAmount != null) ... [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('총 금액 ', style: TextStyle(fontSize: 23)),
+                  Text('$_totalAmount', style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
+                  Text(' 원', style: TextStyle(fontSize: 23)),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('정산할 인원', style: TextStyle(fontSize: 23)),
+                  IconButton(onPressed: _decreasePeople, icon: Icon(Icons.remove)),
+                  Text('$peopleCount 명', style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
+                  IconButton(onPressed: _increasePeople, icon: Icon(Icons.add)),
+                ],
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF574142),
+                  foregroundColor: Color(0xFFF5E0D3),
+                  minimumSize: Size(double.infinity, 60),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () async {
+                  if (_totalAmount != null) {
+                    final ui.Image? capturedImage = await _captureCanvas();
+                    final total = double.tryParse(
+                        _totalAmount!.replaceAll(RegExp(r'[^\d.]'), '')) ??
+                        0;
+                    final perPerson = total / peopleCount;
 
-                  final formatter = NumberFormat('#,###');
-                  final formattedAmount = formatter.format(perPerson);
+                    final formatter = NumberFormat('#,###');
+                    final formattedAmount = formatter.format(perPerson);
 
-                  // 모달
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: Text('정산 결과'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (capturedImage != null)
-                            SizedBox(
-                              width: 300,
-                              height: 300,
-                              child: RawImage(image: capturedImage),
+                    // 모달
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text('정산 결과'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (capturedImage != null)
+                              SizedBox(
+                                width: 300,
+                                height: 300,
+                                child: RawImage(image: capturedImage),
+                              ),
+                            Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20)),
+                            Text('정산할 인원 $peopleCount 명', style: TextStyle(fontSize: 20)),
+                            Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20)),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed:() async {
+                              await _saveDataToFirebase(
+                                  formattedAmount, capturedImage);
+                              Navigator.of(ctx).pushReplacementNamed('/chatting');
+                            },
+                            child: Text('확인'),
                             ),
-                          Text('총 금액 $_totalAmount 원', style: TextStyle(fontSize: 20)),
-                          Text('정산할 인원 $peopleCount 명', style: TextStyle(fontSize: 20)),
-                          Text('1인당 $formattedAmount 원', style: TextStyle(fontSize: 20)),
                         ],
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: Text('닫기'),
-                        ),
-                        TextButton(
-                          onPressed:() async {
-                            await _saveDataToFirebase(
-                                formattedAmount, capturedImage);
-                            Navigator.of(ctx).pushReplacementNamed('/chatting');
-                          },
-                          child: Text('확인'),
-                          ),
-                      ],
-                    ),
-                  );
-                }
-              },
-              child: Text('정산하기'),
-            ),
+                    );
+                  }
+                },
+                child: Text('정산하기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+              ),
+            ],
           ],
         ),
       ),
