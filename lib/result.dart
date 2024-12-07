@@ -625,8 +625,6 @@ class _ResultPageState extends State<ResultPage> {
       await chatRoomRef.set({
         'docId': docId,
         'createdAt': FieldValue.serverTimestamp(),
-        'members': [user.uid], // 채팅방에 참여한 사용자의 UID
-        'lastMessage': '',
         'isActive': true,
       });
 

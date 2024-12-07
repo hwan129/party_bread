@@ -435,8 +435,6 @@ void showBreadDetails(Map<String, dynamic> bread) {
       await chatRoomRef.set({
         'docId': docId,
         'createdAt': FieldValue.serverTimestamp(),
-        'members': [user.uid], // 채팅방에 참여한 사용자의 UID
-        'lastMessage': '',
         'isActive': true,
       });
 
