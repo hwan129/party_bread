@@ -418,14 +418,14 @@ class _AddPageState extends State<AddPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("아래 내용이 맞나요?"),
+        title: Text("아래 내용이 맞나요?", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Color(0xFF574142))),
         content: Container(
           width: 300, // 너비를 300으로 설정
           height: 300, // 높이를 400으로 설정
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: inputData.entries
-                .map((entry) => Text("${entry.key}: ${entry.value}"))
+                .map((entry) => Text("${entry.key} : ${entry.value}", style: TextStyle(fontSize: 15, color: Color(0xFF574142))))
                 .toList(),
           ),
         ),
@@ -436,19 +436,47 @@ class _AddPageState extends State<AddPage> {
         //       .toList(),
         // ),
         actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop(); // Modal을 닫고 이전 화면으로 돌아갑니다.
-            },
-            child: Text("취소"),
-          ),
-          TextButton(
-            onPressed: () {
-              _submitData(inputData); // Firebase에 데이터 전송
-              Navigator.of(ctx).pop(); // Modal을 닫고 detail 화면으로 이동
-              Navigator.pop(ctx); // 페이지 네비게이션
-            },
-            child: Text("확인"),
+          Column(
+            children: [
+              Text("이대로 팟빵을 구우시겠어요?", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text("한번 팟빵을 굽고 나면 수정이 불가능합니다.", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Text("다시 반죽하기", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Color(0xFFF5E0D3)),
+                  foregroundColor: MaterialStateProperty.all(Color(0xFF574142)),
+                  minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  _submitData(inputData);
+                  Navigator.of(ctx).pop();
+                  Navigator.pop(ctx);
+                },
+                child: Text("이대로 팟빵 굽기", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Color(0xFF574142)),
+                  foregroundColor: MaterialStateProperty.all(Color(0xFFF5E0D3)),
+                  minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
