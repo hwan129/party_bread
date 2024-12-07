@@ -152,29 +152,59 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
 
   String? nickname;
+
+  String appBarTitle = ''; // AppBar 제목 초기화
   String? lastSender;
+
 
   @override
   void initState() {
     super.initState();
-    fetchUserNickname();
+    initializeChatRoom(); // 초기화 함수 호출
   }
 
-  // 현재 로그인된 사용자의 닉네임을 Firebase에서 가져옴
-  Future<void> fetchUserNickname() async {
-    try {
-      final uid = _auth.currentUser?.uid;
-      if (uid == null) {
-        print('사용자가 로그인되어 있지 않습니다.');
-        return;
-      }
+  // 초기화 함수
+  Future<void> initializeChatRoom() async {
+    await fetchUserNickname();
+    await fetchChatRoomDetails();
+    setState(() {}); // 초기화 후 상태 업데이트
+  }
 
-      final userDoc = await _firestore.collection('user').doc(uid).get(); // 'user' 컬렉션에서 uid로 조회
-      setState(() {
-        nickname = userDoc.data()?['name'] ?? '익명';
-      });
-    } catch (e) {
-      print('닉네임 로드 오류: $e');
+  // 닉네임 가져오기
+  Future<void> fetchUserNickname() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final userDoc = await _firestore.collection('user').doc(uid).get();
+    nickname = userDoc.data()?['name'] ?? '익명';
+  }
+
+  // 채팅방 세부 정보 가져오기
+  Future<void> fetchChatRoomDetails() async {
+    final roomDoc = await _firestore.collection('bread').doc(widget.roomId).get();
+    if (roomDoc.exists) {
+      final data = roomDoc.data();
+      final category = data?['category'];
+      final roomData = data?['data'];
+
+      switch (category) {
+        case "택시팟빵":
+          appBarTitle = roomData?['목적지'] ?? "알 수 없는 목적지";
+          break;
+        case "배달팟빵":
+          appBarTitle = roomData?['음식 이름'] ?? "알 수 없는 음식 이름";
+          break;
+        case "공구팟빵":
+          appBarTitle = roomData?['제품명'] ?? "알 수 없는 제품명";
+          break;
+        case "기타팟빵":
+          appBarTitle = roomData?['이름'] ?? "알 수 없는 이름";
+          break;
+        default:
+          appBarTitle = "알 수 없는 채팅방";
+      }
+    } else {
+      appBarTitle = "채팅방 정보 없음";
     }
   }
 
@@ -182,30 +212,27 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Future<void> sendMessage() async {
     if (_messageController.text.trim().isEmpty || nickname == null) return;
 
-    try {
-      final message = {
-        'uid': _auth.currentUser?.uid,
-        'nickname': nickname,
-        'message': _messageController.text.trim(),
-        'timestamp': FieldValue.serverTimestamp(),
-      };
+    final message = {
+      'nickname': nickname,
+      'message': _messageController.text.trim(),
+      'timestamp': FieldValue.serverTimestamp(),
+    };
 
-      await _firestore
-          .collection('chat_rooms')
-          .doc(widget.roomId)
-          .collection('messages')
-          .add(message);
+    await _firestore
+        .collection('chat_rooms')
+        .doc(widget.roomId)
+        .collection('messages')
+        .add(message);
 
-      _messageController.clear(); // 메시지 입력창 초기화
-    } catch (e) {
-      print('메시지 전송 오류: $e');
-    }
+    _messageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.roomId}')),
+      appBar: AppBar(
+        title: Text(appBarTitle), // 즉시 표시되는 제목
+      ),
       body: Column(
         children: [
           // 실시간 메시지 스트림
