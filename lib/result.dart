@@ -66,38 +66,40 @@ class _ResultPageState extends State<ResultPage> {
 
               if (timeText != null) {
                 try {
-                  // 시간 형식 검증
-                  final timeRegex = RegExp(r'^\d{1,2}:\d{2} (AM|PM)$');
-                  if (!timeRegex.hasMatch(timeText)) {
-                    print("시간 형식이 올바르지 않습니다: $timeText");
-                    return null;
-                  }
-
                   final DateTime now = DateTime.now();
                   print("현재 시간: $now");
 
-                  // 시간 문자열을 24시간 형식으로 변환
-                  final DateTime itemTime =
-                      DateFormat('hh:mm a', 'en_US').parse(timeText);
-                  final String formattedTime =
-                      DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
-                  print("픽업 시간 (24시간 형식): $formattedTime");
+                  if (data['category'] == '배달팟빵' ||
+                      data['category'] == '택시팟빵') {
+                    // 시간 문자열을 24시간 형식으로 변환
+                    final DateTime itemTime =
+                        DateFormat('hh:mm a', 'en_US').parse(timeText);
 
-                  // 현재 날짜에 변환된 시간 적용
-                  final DateTime itemDateTime = DateTime(
-                    now.year,
-                    now.month,
-                    now.day,
-                    itemTime.hour,
-                    itemTime.minute,
-                  );
+                    // 현재 날짜에 변환된 시간 적용
+                    final DateTime itemDateTime = DateTime(
+                      now.year,
+                      now.month,
+                      now.day,
+                      itemTime.hour,
+                      itemTime.minute,
+                    );
+                    // 변환된 시간과 현재 시간 비교
+                    print("현재 날짜에 맞춘 시간: $itemDateTime");
+                    if (itemDateTime.isBefore(now)) {
+                      print("입력된 시간이 이미 지났습니다.");
+                      return null;
+                    }
+                  } else {
+                    final String deadlineString =
+                        '${data['data']['마감일']} ${data['data']['마감 시간']}';
+                    final DateFormat inputFormat =
+                        DateFormat('yyyy-MM-dd h:mm a');
+                    final DateTime deadline = inputFormat.parse(deadlineString);
 
-                  print("현재 날짜에 맞춘 시간: $itemDateTime");
-
-                  // 변환된 시간과 현재 시간 비교
-                  if (itemDateTime.isBefore(now)) {
-                    print("입력된 시간이 이미 지났습니다.");
-                    return null;
+                    if (deadline.isBefore(now)) {
+                      print("입력된 시간이 이미 지났습니다.");
+                      return null;
+                    }
                   }
                 } catch (e) {
                   print("시간 변환 중 오류 발생: $e");
@@ -464,7 +466,9 @@ class _ResultPageState extends State<ResultPage> {
                         );
                       }
                     },
-                    child: Text('팟빵 함께 먹기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: Text('팟빵 함께 먹기',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF574142),
                       foregroundColor: Color(0xFFF5E0D3),
@@ -474,6 +478,9 @@ class _ResultPageState extends State<ResultPage> {
                       ),
                     ),
                   ),
+                ),
+                SizedBox(
+                  height: 20,
                 ),
               ],
             ),

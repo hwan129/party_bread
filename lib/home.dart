@@ -127,13 +127,6 @@ class _HomePageState extends State<HomePage> {
 
               if (timeText != null) {
                 try {
-                  // 시간 형식 검증
-                  final timeRegex = RegExp(r'^\d{1,2}:\d{2} (AM|PM)$');
-                  if (!timeRegex.hasMatch(timeText)) {
-                    print("시간 형식이 올바르지 않습니다: $timeText");
-                    return null;
-                  }
-
                   final DateTime now = DateTime.now();
                   // print("현재 시간: $now");
 
@@ -466,7 +459,6 @@ class _HomePageState extends State<HomePage> {
                               .collection('user')
                               .doc(user.uid);
 
-
                           // 유저의 interactedDocs 배열에 해당 문서 ID가 존재하는지 확인
                           final userSnapshot = await userDoc.get();
                           final interactedDocs = List<String>.from(
@@ -550,6 +542,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
+                ),
+                SizedBox(
+                  height: 20,
                 ),
               ],
             ),

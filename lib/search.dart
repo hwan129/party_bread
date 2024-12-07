@@ -50,9 +50,6 @@ class _SearchPageState extends State<SearchPage> {
 
   Future<void> fetchBreadData() async {
     // try {
-    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
-    final userLat = geoProvider.latitude!;
-    final userLon = geoProvider.longitude!;
     final querySnapshot =
         await FirebaseFirestore.instance.collection('bread').get();
 
@@ -74,47 +71,47 @@ class _SearchPageState extends State<SearchPage> {
             }
 
             if (timeText != null) {
-              // try {
-              // 시간 형식 검증
-              final timeRegex = RegExp(r'^\d{1,2}:\d{2} (AM|PM)$');
-              if (!timeRegex.hasMatch(timeText)) {
-                print("시간 형식이 올바르지 않습니다: $timeText");
+              try {
+                final DateTime now = DateTime.now();
+                // print("현재 시간: $now");
+
+                if (data['category'] == '배달팟빵' || data['category'] == '택시팟빵') {
+                  // 시간 문자열을 24시간 형식으로 변환
+                  final DateTime itemTime =
+                      DateFormat('hh:mm a', 'en_US').parse(timeText);
+
+                  // 현재 날짜에 변환된 시간 적용
+                  final DateTime itemDateTime = DateTime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    itemTime.hour,
+                    itemTime.minute,
+                  );
+                  // 변환된 시간과 현재 시간 비교
+                  print("현재 날짜에 맞춘 시간: $itemDateTime");
+                  if (itemDateTime.isBefore(now)) {
+                    print("입력된 시간이 이미 지났습니다.");
+                    return null;
+                  }
+                } else {
+                  final String deadlineString =
+                      '${data['data']['마감일']} ${data['data']['마감 시간']}';
+                  final DateFormat inputFormat =
+                      DateFormat('yyyy-MM-dd h:mm a');
+                  final DateTime deadline = inputFormat.parse(deadlineString);
+
+                  if (deadline.isBefore(now)) {
+                    print("입력된 시간이 이미 지났습니다.");
+                    return null;
+                  }
+                }
+              } catch (e) {
+                print("시간 변환 중 오류 발생: $e");
                 return null;
               }
-
-              final DateTime now = DateTime.now();
-              // print("현재 시간: $now");
-
-              // 시간 문자열을 24시간 형식으로 변환
-              final DateTime itemTime =
-                  DateFormat('hh:mm a', 'en_US').parse(timeText);
-              final String formattedTime =
-                  DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
-              print("픽업 시간 (24시간 형식): $formattedTime");
-
-              // 현재 날짜에 변환된 시간 적용
-              final DateTime itemDateTime = DateTime(
-                now.year,
-                now.month,
-                now.day,
-                itemTime.hour,
-                itemTime.minute,
-              );
-
-              print("현재 날짜에 맞춘 시간: $itemDateTime");
-
-              // 변환된 시간과 현재 시간 비교
-              if (itemDateTime.isBefore(now)) {
-                print("입력된 시간이 이미 지났습니다.");
-                return null;
-              }
-              // } catch (e) {
-              //   print("시간 변환 중 오류 발생: $e");
-              //   return null;
-              // }
             }
 
-            String category = data['category'] ?? '';
             if (data['category'] == '택시팟빵') {
               return {
                 'docId': doc.id,
@@ -485,6 +482,9 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 ),
+                SizedBox(
+                  height: 20,
+                ),
               ],
             ),
           ),
@@ -643,7 +643,7 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.all(15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -710,7 +710,7 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ],
