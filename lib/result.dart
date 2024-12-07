@@ -425,47 +425,36 @@ class _ResultPageState extends State<ResultPage> {
         ));
   }
   Future<void> createChatRoom(String docId) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
+  try {
+    final user = FirebaseAuth.instance.currentUser;
 
-      if (user != null) {
-        // 새로운 채팅방 문서를 Firestore에 생성
-        final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc(docId);
+    if (user != null) {
+      // 새로운 채팅방 문서를 Firestore에 생성
+      final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc(docId);
 
-        // 이미 채팅방이 존재하는지 확인 (중복 생성 방지)
-        final chatRoomSnapshot = await chatRoomRef.get();
+      // 채팅방 생성 (이미 존재하는 채팅방을 체크하지 않음)
+      await chatRoomRef.set({
+        'docId': docId,
+        'createdAt': FieldValue.serverTimestamp(),
+        'members': [user.uid], // 채팅방에 참여한 사용자의 UID
+        'lastMessage': '',
+        'isActive': true,
+      });
 
-        if (!chatRoomSnapshot.exists) {
-          // 채팅방 생성
-          await chatRoomRef.set({
-            'docId': docId,
-            'createdAt': FieldValue.serverTimestamp(),
-            'members': [user.uid], // 채팅방에 참여한 사용자의 UID
-            'lastMessage': '',
-            'isActive': true,
-          });
-
-          // 채팅방 생성 후 해당 채팅방으로 이동
-          Navigator.pushNamed(
-            context,
-            '/chatting',
-            arguments: {'roomId': docId}, // 문서 ID를 이용해 채팅방으로 이동
-          );
-        } else {
-          // 이미 존재하는 채팅방으로 이동
-          Navigator.pushNamed(
-            context,
-            '/chatting',
-            arguments: {'roomId': docId},
-          );
-        }
-      }
-    } catch (e) {
-      print('채팅방 생성 중 오류 발생: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('채팅방 생성 중 오류가 발생했습니다.')),
+      // 채팅방 생성 후 해당 채팅방으로 이동
+      Navigator.pushNamed(
+        context,
+        '/chatting',
+        arguments: {'roomId': docId}, // 문서 ID를 이용해 채팅방으로 이동
       );
     }
+  } catch (e) {
+    print('채팅방 생성 중 오류 발생: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('채팅방 생성 중 오류가 발생했습니다.')),
+    );
   }
+}
+
 }
 
