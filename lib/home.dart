@@ -17,6 +17,9 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = true;
   List<Map<String, dynamic>> breads = [];
 
+  String userName = "사용자 이름";
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -26,13 +29,28 @@ class _HomePageState extends State<HomePage> {
 
       // fetchGeoData가 완료된 후 fetchBreadData 실행
       fetchBreadData();
+      _loadUserData();
     });
+  }
+
+  Future<void> _loadUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('user').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userName = userDoc['name'] ?? userName;
+        });
+      }
+    }
   }
 
   Widget _categoryButton(String category) {
     return Flexible(
         child: Container(
-          width: 80,
+      width: 80,
       height: 85,
       decoration: BoxDecoration(
         color: Colors.white, // 버튼 배경색
@@ -67,7 +85,10 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Text(
           category,
-          style: TextStyle(color: Color(0xFF574142), fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Color(0xFF574142),
+              fontSize: 15,
+              fontWeight: FontWeight.bold),
         ),
       ),
     ));
@@ -242,32 +263,6 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 if (bread['category'] == '택시팟빵') ...[
-//                     children: [
-//                       Text(
-//                         "${bread['pickMeUp'] ?? '정보 없음'}",
-//                         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-//                       ),
-//                       Text(
-//                         "  ->  ",
-//                         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-//                       ),
-//                       Text(
-//                         "${bread['destination'] ?? '정보 없음'}",
-//                         style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-//                       ),
-//                     ],
-//                   ),
-//                   // Text(
-//                   //   "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
-//                   //   style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-//                   // ),
-//                   SizedBox(height: 8),
-//                   // Text(
-//                   //   "목적지: ${bread['destination'] ?? '정보 없음'}",
-//                   //   style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-//                   // ),
-//                   SizedBox(height: 16),
-//                   Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                   //택시
                   Text(
                     "${bread['meetArea']} -> ${bread['destination']}",
@@ -342,21 +337,6 @@ class _HomePageState extends State<HomePage> {
                 ] else ...[
                   // 공구, 기타
                   Text(
-//                     bread['name'] ?? '제목 없음',
-//                     style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-//                   ),
-//                   SizedBox(height: 10),
-//                   Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-//                   Text("픽업 시간: ${bread['pickupTime'] ?? '미정'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-//                 ],
-//                 SizedBox(height: 10),
-//                 Text(
-//                   "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
-//                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//                 ),
-//                 SizedBox(height: 10),
-//                 Text("세부사항: ${bread['detail'] ?? '없음'}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-//                 Spacer(),
                     bread['name'],
                     style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
                   ),
@@ -546,7 +526,9 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
                     },
-                    child: Text('팟빵 함께 먹기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    child: Text('팟빵 함께 먹기',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF574142),
                       foregroundColor: Color(0xFFF5E0D3),
@@ -572,7 +554,7 @@ class _HomePageState extends State<HomePage> {
         child: InkWell(
           onTap: () => showBreadDetails(bread),
           child: Container(
-            height: 85,
+              height: 85,
               decoration: BoxDecoration(
                 color: Colors.white, // 배경색 설정
                 borderRadius: BorderRadius.circular(10), // 둥근 모서리 설정
@@ -629,8 +611,10 @@ class _HomePageState extends State<HomePage> {
                 geoProvider.Si != null
                     ? '${geoProvider.Si} ${geoProvider.Gu} ${geoProvider.Dong} ${geoProvider.street}'
                     : "주소를 가져오는 중...",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(
-                    0xFFBAA3A3)),
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFBAA3A3)),
               );
             },
           ),
@@ -671,22 +655,25 @@ class _HomePageState extends State<HomePage> {
                     },
                     onSubmitted: (value) {
                       if (value.isNotEmpty) {
-                        Navigator.pushNamed(context, '/search', arguments: value); // /search 페이지로 이동
+                        Navigator.pushNamed(context, '/search',
+                            arguments: value); // /search 페이지로 이동
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: "hihi 님, 어떤 팟빵을 찾으세요?",
+                      hintText: "$userName 님, 어떤 팟빵을 찾으세요?",
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
                       prefixIcon: Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF574142), width: 1),
+                        borderSide:
+                            BorderSide(color: Color(0xFF574142), width: 1),
                         borderRadius: BorderRadius.all(Radius.circular(30.0)),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF574142), width: 2),
+                        borderSide:
+                            BorderSide(color: Color(0xFF574142), width: 2),
                         borderRadius: BorderRadius.all(Radius.circular(30.0)),
                       ),
                     ),
@@ -703,8 +690,18 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(
                     height: 5,
                   ),
-                  Text("완료되기까지", style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold),),
-                  Text("시간이 얼마남지 않았으니 서두르세요!",  style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    "완료되기까지",
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text("시간이 얼마남지 않았으니 서두르세요!",
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
                   SizedBox(
                     height: 10,
                   ),
@@ -758,13 +755,15 @@ class _HomePageState extends State<HomePage> {
           return const Center(child: Text("데이터를 가져올 수 없습니다."));
         }));
   }
+
   Future<void> createChatRoom(String docId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
         // 새로운 채팅방 문서를 Firestore에 생성
-        final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc(docId);
+        final chatRoomRef =
+            FirebaseFirestore.instance.collection('chatRooms').doc(docId);
 
         // 이미 채팅방이 존재하는지 확인 (중복 생성 방지)
         final chatRoomSnapshot = await chatRoomRef.get();

@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth 추가
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../provider.dart';
 
 class SearchPage extends StatefulWidget {
@@ -49,33 +50,31 @@ class _SearchPageState extends State<SearchPage> {
 
   Future<void> fetchBreadData() async {
     // try {
-      final geoProvider = Provider.of<GeoProvider>(context, listen: false);
-      final userLat = geoProvider.latitude!;
-      final userLon = geoProvider.longitude!;
-      final querySnapshot = await FirebaseFirestore.instance.collection('bread').get();
+    final geoProvider = Provider.of<GeoProvider>(context, listen: false);
+    final userLat = geoProvider.latitude!;
+    final userLon = geoProvider.longitude!;
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('bread').get();
 
-      setState(() {
-        breads = querySnapshot.docs
-            .map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final selectedLat = data['selected_lat'] ?? 0.0;
-          final selectedLon = data['selected_lon'] ?? 0.0;
+    setState(() {
+      breads = querySnapshot.docs
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final selectedLat = data['selected_lat'] ?? 0.0;
+            final selectedLon = data['selected_lon'] ?? 0.0;
 
-          double distance =
-          calculateDistance(userLat, userLon, selectedLat, selectedLon);
+            // 시간 데이터 처리
+            final String? timeText = data['data']['픽업 시간'] ??
+                data['data']['탑승 시간'] ??
+                data['data']['마감일'];
+            // print('time text : ${timeText}');
 
-          // 시간 데이터 처리
-          final String? timeText = data['data']['픽업 시간'] ??
-              data['data']['탑승 시간'] ??
-              data['data']['마감일'];
-          // print('time text : ${timeText}');
+            if (!data.toString().contains(_searchQuery)) {
+              return null; // 검색어에 일치하지 않으면 제외
+            }
 
-          if (!data.toString().contains(_searchQuery)) {
-            return null; // 검색어에 일치하지 않으면 제외
-          }
-
-          if (timeText != null) {
-            // try {
+            if (timeText != null) {
+              // try {
               // 시간 형식 검증
               final timeRegex = RegExp(r'^\d{1,2}:\d{2} (AM|PM)$');
               if (!timeRegex.hasMatch(timeText)) {
@@ -88,9 +87,9 @@ class _SearchPageState extends State<SearchPage> {
 
               // 시간 문자열을 24시간 형식으로 변환
               final DateTime itemTime =
-              DateFormat('hh:mm a', 'en_US').parse(timeText);
+                  DateFormat('hh:mm a', 'en_US').parse(timeText);
               final String formattedTime =
-              DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
+                  DateFormat('HH:mm').format(itemTime); // 24시간 형식으로 변환
               print("픽업 시간 (24시간 형식): $formattedTime");
 
               // 현재 날짜에 변환된 시간 적용
@@ -109,68 +108,70 @@ class _SearchPageState extends State<SearchPage> {
                 print("입력된 시간이 이미 지났습니다.");
                 return null;
               }
-            // } catch (e) {
-            //   print("시간 변환 중 오류 발생: $e");
-            //   return null;
-            // }
-          }
+              // } catch (e) {
+              //   print("시간 변환 중 오류 발생: $e");
+              //   return null;
+              // }
+            }
 
-          if (distance <= 100000) {
             String category = data['category'] ?? '';
-            if (category == '택시팟빵') {
+            if (data['category'] == '택시팟빵') {
               return {
+                'docId': doc.id,
                 'category': data['category'],
-                'pickMeUp': data['data']['탑승 장소'],
+                'meetArea': data['data']['탑승 장소'],
                 'destination': data['data']['목적지'],
                 'deadline': data['data']['탑승 시간'],
                 'peopleCount': data['data']['인원 수'],
                 'currentpeopleCount': data['data']['현재 인원 수'],
                 'detail': data['data']['추가 사항'],
+                'selected_loc': LatLng(selectedLat, selectedLon)
               };
-            } else if (category == '공구팟빵') {
+            } else if (data['category'] == '배달팟빵') {
               return {
-                'docId': doc.id, // 문서 ID 추가
+                'docId': doc.id,
+                'category': data['category'],
+                'name': data['data']['음식 이름'],
+                'orderTime': data['data']['주문 시간'],
+                'deadline': data['data']['픽업 시간'],
+                'meetArea': data['data']['픽업 위치'],
+                'peopleCount': data['data']['인원 수'],
+                'currentpeopleCount': data['data']['현재 인원 수'],
+                'detail': data['data']['추가 사항'],
+                'selected_loc': LatLng(selectedLat, selectedLon)
+              };
+            } else if (data['category'] == '공구팟빵') {
+              return {
+                'docId': doc.id,
                 'category': data['category'],
                 'name': data['data']['제품명'],
                 'deadline': data['data']['마감일'],
                 'peopleCount': data['data']['인원 수'],
                 'currentpeopleCount': data['data']['현재 인원 수'],
                 'detail': data['data']['추가 사항'],
+                'selected_loc': LatLng(selectedLat, selectedLon)
               };
-            }
-            else if (category == '기타팟빵') {
+            } else if (data['category'] == '기타팟빵') {
               return {
-                'docId': doc.id, // 문서 ID 추가
+                'docId': doc.id,
                 'category': data['category'],
                 'name': data['data']['이름'],
                 'deadline': data['data']['마감일'],
-                'area': data['data']['장소'],
+                'meetArea': data['data']['장소'],
                 'peopleCount': data['data']['인원 수'],
                 'currentpeopleCount': data['data']['현재 인원 수'],
                 'detail': data['data']['추가 사항'],
+                'selected_loc': LatLng(selectedLat, selectedLon)
               };
             }
-            else if (category == '배달팟빵') {
-              return {
-                'docId': doc.id, // 문서 ID 추가
-                'category': data['category'],
-                'name': data['data']['음식 이름'], // 수정된 변수명
-                'orderTime': data['data']['주문 시간'], // 수정된 변수명
-                'deadline': data['data']['픽업 시간'], // 수정된 변수명
-                'peopleCount': data['data']['인원 수'], // 수정된 변수명
-                'currentpeopleCount': data['data']['현재 인원 수'], // 수정된 변수명
-                'detail': data['data']['추가 사항'], // 수정된 변수명
-              };
-            }
-          }
-        })
-            .where((bread) => bread != null) // null 제거
-            .cast<Map<String, dynamic>>() // 명시적 캐스팅
-            .toList();
+          })
+          .where((bread) => bread != null) // null 제거
+          .cast<Map<String, dynamic>>() // 명시적 캐스팅
+          .toList();
 
-        isLoading = false;
-        print("bread ${breads}");
-      });
+      isLoading = false;
+      print("bread ${breads}");
+    });
     // } catch (e) {
     //   setState(() {
     //     isLoading = false;
@@ -180,6 +181,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void showBreadDetails(Map<String, dynamic> bread) {
+    print('detail bread:${bread}');
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -187,10 +189,12 @@ class _SearchPageState extends State<SearchPage> {
       ),
       isScrollControlled: true,
       builder: (BuildContext context) {
+        final geoProvider = Provider.of<GeoProvider>(context);
+        late GoogleMapController _mapController;
         return FractionallySizedBox(
-          heightFactor: 0.5,
+          heightFactor: 0.8,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -204,33 +208,187 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ],
                 ),
-                if (categoryName == '택시팟빵') ...[
+                if (bread['category'] == '택시팟빵') ...[
+                  //택시
                   Text(
-                    "출발지: ${bread['pickMeUp'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    "${bread['meetArea']} -> ${bread['destination']}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "목적지: ${bread['destination'] ?? '정보 없음'}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  SizedBox(
+                    height: 15,
                   ),
-                  SizedBox(height: 16),
-                  Text("탑승 시간: ${bread['deadline'] ?? '정보 없음'}"),
-                ] else ...[
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "탑승 시간 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20), // 볼드 처리
+                        ),
+                        TextSpan(
+                            text: "${bread['deadline'] ?? '알 수 없음'}",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ] else if (bread['category'] == '배달팟빵') ...[
+                  // 배달
                   Text(
                     bread['name'] ?? '제목 없음',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
                   ),
-                  Text("주문 시간: ${bread['orderTime'] ?? '알 수 없음'}"),
-                  Text("픽업 시간: ${bread['deadline'] ?? '미정'}"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "주문 시간 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20), // 볼드 처리
+                        ),
+                        TextSpan(
+                            text: "${bread['orderTime'] ?? '알 수 없음'}",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "픽업 시간 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20), // 볼드 처리
+                        ),
+                        TextSpan(
+                            text: "${bread['deadline'] ?? '알 수 없음'}",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ] else ...[
+                  // 공구, 기타
+                  Text(
+                    bread['name'],
+                    style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "마감일 : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        TextSpan(
+                            text: "${bread['deadline']}'",
+                            style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                 ],
-                SizedBox(height: 10),
-                Text(
-                  "현재 인원 수/인원 수: ${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
+                // 공통
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "현재 인원 수 : ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20), // 볼드 처리
+                      ),
+                      TextSpan(
+                          text:
+                              "${bread['currentpeopleCount'] ?? 0}/${bread['peopleCount'] ?? 0}",
+                          style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 10),
-                Text("세부사항: ${bread['detail'] ?? '없음'}"),
-                Spacer(),
+                SizedBox(
+                  height: 10,
+                ),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "세부사항: ",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20), // 볼드 처리
+                      ),
+                      TextSpan(
+                          text: "${bread['detail'] ?? '없음'}",
+                          style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                if (bread['category'] == '공구팟빵') ...[
+                  Spacer()
+                ] else ...[
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                            text: "${bread['meetArea'] ?? '?'}",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20)),
+                        TextSpan(
+                          text: "  (으)로 모이세요!",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: bread['selected_loc'],
+                        zoom: 17,
+                      ),
+                      mapType: MapType.normal,
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                      },
+                      onTap: (LatLng coordinate) {
+                        _mapController.animateCamera(
+                          CameraUpdate.newLatLng(coordinate),
+                        );
+                        geoProvider.updateLocation(
+                            coordinate.latitude, coordinate.longitude);
+                      },
+                      markers: {
+                        Marker(
+                          markerId: MarkerId("1"),
+                          position: bread['selected_loc'],
+                        ),
+                      },
+                    ),
+                  ),
+                ],
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
@@ -247,19 +405,27 @@ class _SearchPageState extends State<SearchPage> {
                           final userSnapshot = await userDoc.get();
                           final interactedDocs = List<String>.from(
                               userSnapshot.data()?['interactedDocs'] ?? []);
+
                           // 문서 ID가 없으면 추가
                           if (!interactedDocs.contains(bread['docId'])) {
                             // 'currentpeopleCount'와 'peopleCount'가 null이 아니고, int로 변환 가능한지 체크
-                            if (bread['currentpeopleCount'] != null && bread['peopleCount'] != null) {
+                            if (bread['currentpeopleCount'] != null &&
+                                bread['peopleCount'] != null) {
                               try {
                                 // String을 int로 변환
-                                int currentPeopleCount = int.tryParse(bread['currentpeopleCount'].toString()) ?? 0;
-                                int peopleCount = int.tryParse(bread['peopleCount'].toString()) ?? 0;
+                                int currentPeopleCount = int.tryParse(
+                                        bread['currentpeopleCount']
+                                            .toString()) ??
+                                    0;
+                                int peopleCount = int.tryParse(
+                                        bread['peopleCount'].toString()) ??
+                                    0;
 
                                 // 인원 수가 같지 않으면
                                 if (currentPeopleCount != peopleCount) {
                                   await userDoc.update({
-                                    'interactedDocs': FieldValue.arrayUnion([bread['docId']]) // 문서 ID 추가
+                                    'interactedDocs': FieldValue.arrayUnion(
+                                        [bread['docId']]) // 문서 ID 추가
                                   });
 
                                   // Firestore에서 해당 bread 문서의 '현재 인원 수' 증가
@@ -267,21 +433,21 @@ class _SearchPageState extends State<SearchPage> {
                                       .collection('bread')
                                       .doc(bread['docId']);
                                   final breadSnapshot = await breadDoc.get();
-                                  String currentPeopleCountStr = breadSnapshot.data()?['data']['현재 인원 수']?.toString() ?? '0';
+                                  String currentPeopleCountStr = breadSnapshot
+                                          .data()?['data']['현재 인원 수']
+                                          ?.toString() ??
+                                      '0';
 
                                   // int로 변환
-                                  int currentPeopleCount = int.tryParse(currentPeopleCountStr) ?? 0;
-                                  print("현재원 : $currentPeopleCount");
+                                  int currentPeopleCount =
+                                      int.tryParse(currentPeopleCountStr) ?? 0;
                                   await breadDoc.update({
-                                    'data.현재 인원 수': currentPeopleCount + 1, // 현재 인원 수 +1
+                                    'data.현재 인원 수':
+                                        currentPeopleCount + 1, // 현재 인원 수 +1
                                   });
 
                                   // 채팅 화면으로 이동
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/chatting',
-                                    arguments: {'roomId': bread['category']},
-                                  );
+                                  await createChatRoom(bread['docId']);
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('인원이 다 찼습니다!')),
@@ -290,16 +456,13 @@ class _SearchPageState extends State<SearchPage> {
                               } catch (e) {
                                 print('변환 오류 발생: $e');
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('숫자 변환 중 오류가 발생했습니다.')),
+                                  SnackBar(
+                                      content: Text('숫자 변환 중 오류가 발생했습니다.')),
                                 );
                               }
                             }
                           } else {
-                            Navigator.pushNamed(
-                              context,
-                              '/chatting',
-                              arguments: {'roomId': bread['category']},
-                            );
+                            await createChatRoom(bread['docId']);
                           }
                         }
                       } catch (e) {
@@ -309,7 +472,17 @@ class _SearchPageState extends State<SearchPage> {
                         );
                       }
                     },
-                    child: Text('팟빵 함께 먹기'),
+                    child: Text('팟빵 함께 먹기',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF574142),
+                      foregroundColor: Color(0xFFF5E0D3),
+                      minimumSize: Size(double.infinity, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -318,6 +491,51 @@ class _SearchPageState extends State<SearchPage> {
         );
       },
     );
+  }
+
+  Future<void> createChatRoom(String docId) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // 새로운 채팅방 문서를 Firestore에 생성
+        final chatRoomRef =
+            FirebaseFirestore.instance.collection('chatRooms').doc(docId);
+
+        // 이미 채팅방이 존재하는지 확인 (중복 생성 방지)
+        final chatRoomSnapshot = await chatRoomRef.get();
+
+        if (!chatRoomSnapshot.exists) {
+          // 채팅방 생성
+          await chatRoomRef.set({
+            'docId': docId,
+            'createdAt': FieldValue.serverTimestamp(),
+            'members': [user.uid], // 채팅방에 참여한 사용자의 UID
+            'lastMessage': '',
+            'isActive': true,
+          });
+
+          // 채팅방 생성 후 해당 채팅방으로 이동
+          Navigator.pushNamed(
+            context,
+            '/chatting',
+            arguments: {'roomId': docId}, // 문서 ID를 이용해 채팅방으로 이동
+          );
+        } else {
+          // 이미 존재하는 채팅방으로 이동
+          Navigator.pushNamed(
+            context,
+            '/chatting',
+            arguments: {'roomId': docId},
+          );
+        }
+      }
+    } catch (e) {
+      print('채팅방 생성 중 오류 발생: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('채팅방 생성 중 오류가 발생했습니다.')),
+      );
+    }
   }
 
   Widget _listTileBuild(Map<String, dynamic> bread) {
@@ -347,7 +565,7 @@ class _SearchPageState extends State<SearchPage> {
                     SizedBox(height: 3),
                     Text(
                       bread['category'] == '택시팟빵'
-                          ? "${bread['pickMeUp']} -> ${bread['destination']}"
+                          ? "${bread['meetArea']} -> ${bread['destination']}"
                           : '${bread['name']}',
                       style: TextStyle(
                         fontSize: 23,
@@ -403,12 +621,16 @@ class _SearchPageState extends State<SearchPage> {
           decoration: InputDecoration(
             hintText: '세 글자 이상 입력하세요',
             hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
-            suffixIcon: Icon(Icons.search, color: Color(0xFF574142),),
+            suffixIcon: Icon(
+              Icons.search,
+              color: Color(0xFF574142),
+            ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 1.0),
+            contentPadding:
+                EdgeInsets.symmetric(vertical: 10.0, horizontal: 1.0),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),// 아래 선 색상
+              borderSide: BorderSide(color: Colors.transparent), // 아래 선 색상
             ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.transparent), // 포커스 시 색상 변경
@@ -430,24 +652,24 @@ class _SearchPageState extends State<SearchPage> {
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : breads.isEmpty
-                  ? Center(
-                child: Text(
-                  "검색 결과가 없습니다.",
-                  style: TextStyle(fontSize: 18),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: breads.length,
-                itemBuilder: (context, index) {
-                  final bread = breads[index];
-                  // 검색어 필터 적용
-                  if (_searchQuery.isNotEmpty &&
-                      !bread.toString().contains(_searchQuery)) {
-                    return SizedBox(); // 검색어와 일치하지 않으면 빈 공간
-                  }
-                  return _listTileBuild(bread); // 검색 결과 표시
-                },
-              ),
+                      ? Center(
+                          child: Text(
+                            "검색 결과가 없습니다.",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: breads.length,
+                          itemBuilder: (context, index) {
+                            final bread = breads[index];
+                            // 검색어 필터 적용
+                            if (_searchQuery.isNotEmpty &&
+                                !bread.toString().contains(_searchQuery)) {
+                              return SizedBox(); // 검색어와 일치하지 않으면 빈 공간
+                            }
+                            return _listTileBuild(bread); // 검색 결과 표시
+                          },
+                        ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,7 +696,8 @@ class _SearchPageState extends State<SearchPage> {
                     style: TextButton.styleFrom(
                       backgroundColor: Color(0xFF574142),
                       foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 13, horizontal: 80),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 13, horizontal: 80),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
@@ -495,5 +718,4 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
-
 }
